@@ -113,7 +113,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
   							});
 						}
 						reloadFields = reloadFields.substring(0,reloadFields.length - 1);
-						Core.AJAX.FormUpdate($('#'+formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
+						//Core.AJAX.FormUpdate($('#'+formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
 						var FieldConfigInsert = "";
 						if(formID === "NewCustomerTicket"){
 							FieldConfigInsert = CustomerFieldConfigInsert;

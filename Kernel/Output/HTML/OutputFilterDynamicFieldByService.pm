@@ -29,13 +29,7 @@ sub new {
 
     # get needed objects
 
-
     $Self->{UserID} = $Param{UserID};
-
-
-
-
-
 	$Self->{DynamicFieldBackend} =  $Kernel::OM->Get('Kernel::System::DynamicField::Backend');
 	$Self->{DynamicField} =  $Kernel::OM->Get('Kernel::System::DynamicField');
 	$Self->{CustomerUserObject}  = $Kernel::OM->Get('Kernel::System::CustomerUser');
