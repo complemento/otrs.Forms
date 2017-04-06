@@ -1,0 +1,49 @@
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+//	$(function() {
+//		var IDField =  "ServiceID";
+//		$("#" + IDField).change(function(){
+//			var Data = {
+//            	Action: 'DynamicFieldByService',
+//                Subaction: '',
+//                ServiceID:  $("#" + IDField + " option:selected").val(),
+//                IsAjaxRequest: 1,
+//                IsMainWindow: 1
+//	        };
+//		$.ajax({
+//    	        type: 'POST',
+//	            url: Core.Config.Get('CGIHandle'),
+//	            data: Data,
+//	            dataType: 'html',
+//	            success: function (Response) {
+//					alert(Response);
+//					var tabela = "";
+//					var subject = "";
+//					if(Response !== "Undefined"){
+//						var res = Response.split("::::Complemento::::%%::::%%::::");
+//						if(res[0] !== "NotFound"){
+//							tabela = res[0];
+//							subject = res[1];		
+//						}
+//						
+//		                window.CKEDITOR.instances['RichText'].setData(tabela);
+//						if( subject !== "Undefined"){
+//							$("#Subject").val(subject);
+//						}
+//					}
+//				}
+//			});
+//	      });
+//	
+//	});	
+//]]></script>
+[% END %]
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+//    Core.Agent.TicketProcess.Init();
+    Core.Agent.DynamicFieldByService.Init();
+//]]></script>
+<script type="text/javascript">//<![CDATA[
+//]]></script>
+[% END %]
+
