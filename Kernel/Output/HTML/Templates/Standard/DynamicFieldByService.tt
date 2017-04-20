@@ -192,7 +192,7 @@
 
                         <label for="RichText">[% Translate("Body") | html %]:</label>
                         <div class="RichTextField">
-                            <textarea id="RichText" class="RichText" rows="10" cols="60" name="Message">[% Data.Message | html %]</textarea>
+                            <textarea id="RichText" class="RichText" rows="10" cols="60" name="Message">[% Data.Body | html %]</textarea>
                         </div>
                         <div class="Clear"></div>
 

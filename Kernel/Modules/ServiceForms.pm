@@ -11,6 +11,8 @@ package Kernel::Modules::ServiceForms;
 use strict;
 use warnings;
 
+use utf8;
+
 our $ObjectManagerDisabled = 1;
 
 sub new {

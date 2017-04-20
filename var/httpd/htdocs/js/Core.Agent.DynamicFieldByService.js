@@ -86,7 +86,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 					//LOOP QUE PEGA OS VALORES E OS NOMES 
 						Response = res[0];
 						var i;
-						arrayJSON = res[1].split(',');
+						arrayJSON = res[1].split('@%@%@');
 						objectJSON;
 						reloadFields = "";
 						var AgentFieldConfigInsert  = ".SpacingTop:first";
@@ -96,6 +96,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							$.each( objectJSON, function( key, val ) {
 								  if(key && val){
 									if(key === "Message"){
+										console.log(val);
 										window.CKEDITOR.instances['RichText'].setData(val);
 									    reloadFields += ""+key+",";
 									}else if(key === "AgentFieldConfig"){
@@ -117,7 +118,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						var FieldConfigInsert = "";
 						if(formID === "NewCustomerTicket"){
 							FieldConfigInsert = CustomerFieldConfigInsert;
-//							alert(CustomerFieldConfigInsert);
 						}else{
 							 FieldConfigInsert =  AgentFieldConfigInsert;
 						} 	

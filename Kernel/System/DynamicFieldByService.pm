@@ -13,7 +13,7 @@ package Kernel::System::DynamicFieldByService;
 
 use strict;
 use warnings;
-
+use utf8;
 our @ObjectDependencies = (
     'Kernel::Config',
     'Kernel::System::Encode',
@@ -103,16 +103,11 @@ sub DynamicTemplateAdd {
         # dump layout and config as string
         $Config = $Kernel::OM->Get('Kernel::System::YAML')->Dump( Data => $Param{Config} );
     }
-        
+    $Param{WorkflowID} = 1 if (!$Param{WorkflowID});
+ 
     # Make sure the resulting string has the UTF-8 flag. YAML only sets it if
     #   part of the data already had it.
     utf8::upgrade($Config);
-#| id | name                        | comments   | valid_id | content_type | create_time         | create_by | change_time         | change_by | subject | body  | type_id | workflow_id | frontend       | config |
-#+----+-----------------------------+------------+----------+--------------+---------------------+-----------+---------------------+-----------+---------+-------+---------+-------------+----------------+--------+
-#|  1 | Atendimento Multiplicadores | comentario |        1 | text/html    | 2016-01-26 10:23:30 |         1 | 2016-01-26 10:23:30 |         1 | Assunto | Corpo |       4 |        NULL | AgentInterface | NULL   |
-#+----+-----------------------------+------------+----------+--------------+---------------------+-----------+---------------------+-----------+---------+-------+---------+-------------+----------------+--------+
-
-    # sql
 	
     return if !$DBObject->Do(
         SQL => '
@@ -132,11 +127,9 @@ sub DynamicTemplateAdd {
         $ID = $Row[0];
     }
     my $ServiceID = $Param{ServiceID};
-    $Kernel::OM->Get("Kernel::System::Log")->Dumper($ServiceID);
     for(@{$ServiceID}){
     	my $IDService = $_;
  	if(defined($ID)){
-		$Kernel::OM->Get("Kernel::System::Log")->Dumper($IDService);
    		$ServiceObject->ServicePreferencesSet(
 		        ServiceID => $IDService,
 		        Key       => 'Forms',
@@ -203,7 +196,6 @@ sub DynamicTemplateUpdate{
 
     	);
 	my $ServiceID = $Param{ServiceID};
-    	$Kernel::OM->Get("Kernel::System::Log")->Dumper($ServiceID);
 	return if !$DBObject->Do(
         	SQL => "DELETE FROM service_preferences WHERE "
 	            . "preferences_key = 'Forms' AND preferences_value = ?",
@@ -212,7 +204,6 @@ sub DynamicTemplateUpdate{
         for(@{$ServiceID}){
     		my $IDService = $_;
  		if(defined($Param{ID})){
-			$Kernel::OM->Get("Kernel::System::Log")->Dumper($IDService);
 	   		$ServiceObject->ServicePreferencesSet(
 				ServiceID => $IDService,
 				Key       => 'Forms',
@@ -289,15 +280,6 @@ sub DynamicFieldByServiceGet {
         );
     }
 
-#    return if !$Self->{DBObject}->Prepare(
-#        SQL => 'SELECT * FROM autoticket_dynamic_field_value WHERE autoticket_id = ?',
-#        Bind => [ \$Param{ID} ],
-#    );
-    
-#    while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
-#            
- #       $Data{$Data[1]} = $Data[2];
- #   };
 
     return %Data;
 }
@@ -328,29 +310,25 @@ sub DynamicFieldByServiceDelete{
 sub GetDynamicFieldByServiceAndInterface {
 	my ( $Self, %Param ) = @_;
 	my $ServiceObject = $Kernel::OM->Get("Kernel::System::Service");
-    	# check needed stuff
-    	if ( !$Param{ServiceID} && !$Param{InterfaceName} ) {
-	        $Self->{LogObject}->Log( Priority => 'error', Message => 'Need ID!' );
-
-	        return;
+   	# check needed stuff
+   	if ( !$Param{ServiceID} && !$Param{InterfaceName} ) {
+		$Self->{LogObject}->Log( Priority => 'error', Message => 'Need ID!' );
+        return;
 	}
 	my %Preferences = $ServiceObject->ServicePreferencesGet(
-		        ServiceID => $Param{ServiceID},
-		        UserID    => 1,
+		ServiceID => $Param{ServiceID},
+		UserID    => 1,
 	);
 	my $FormID;
 	if( defined($Preferences{Forms})){
 		$FormID = $Preferences{Forms};
-	
 	}
 	if($Param{InterfaceName} eq 'NewCustomerTicket'){
 		$Param{Interface} = 'CustomerInterface';
 	}else{
 		$Param{Interface} = 'AgentInterface';
 	}
-    	# sql
-	
-    	return if !$Self->{DBObject}->Prepare(
+   	return if !$Self->{DBObject}->Prepare(
 		SQL => 'SELECT  distinct name, 
 			comments, 
 			valid_id, 
@@ -390,36 +368,27 @@ sub GetDynamicFieldByServiceAndInterface {
     		$Config = $YAMLObject->Load( Data => $Data[13] );
 		}
 
-        	%Data = (
-        	    ID            => $Data[14],
-        	    Name          => $Data[0],
+       	%Data = (
+            ID            => $Data[14],
+            Name          => $Data[0],
 		    Comments 	  => $Data[1],
-		    ValidID	  => $Data[2],
+		    ValidID	  	  => $Data[2],
 		    ContetType	  => $Data[3], 
 		    CreateTime	  => $Data[4], 
 	   	    CreateBy	  => $Data[5], 
 		    ChangeTime    => $Data[6], 
 		    ChangeBy   	  => $Data[7], 
 		    Subject 	  => $Data[8], 
-		    Body	  => $Data[9], 
-		    Type	  => $Type{Name},
-	            TypeID  	  =>  $Data[10],
+		    Body	 	  => $Data[9], 
+		    Type	  	  => $Type{Name},
+            TypeID  	  => $Data[10],
 		    WorkflowId	  => $Data[11], 
-	            Frontend	  => $Data[12], 
+	        Frontend	  => $Data[12], 
 		    ServiceID	  => $Param{ServiceID}, 
-     		    Config	  => $Config,
+    	    Config	  	  => $Config,
         );
     }
 
-#    return if !$Self->{DBObject}->Prepare(
-#        SQL => 'SELECT * FROM autoticket_dynamic_field_value WHERE autoticket_id = ?',
-#        Bind => [ \$Param{ID} ],
-#    );
-    
-#    while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
-#            
- #       $Data{$Data[1]} = $Data[2];
- #   };
 
     return \%Data;
 }

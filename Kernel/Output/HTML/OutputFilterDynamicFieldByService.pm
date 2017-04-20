@@ -1,6 +1,5 @@
 # --
-# Kernel/Output/HTML/OutputFilterMediaWiki.pm
-# Copyright (C) 2011 - 2015 Complemento - Liberdade e Tecnologia http://www.complemento.net.br
+# Copyright (C) 2011 - 2017 Complemento - Liberdade e Tecnologia http://www.complemento.net.br
 # --
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -12,7 +11,8 @@ package Kernel::Output::HTML::OutputFilterDynamicFieldByService;
 
 use strict;
 use warnings;
-require LWP::UserAgent;
+use utf8;
+
 use List::Util qw(first);
 use HTTP::Status qw(:constants :is status_message);
 use Kernel::System::Encode;

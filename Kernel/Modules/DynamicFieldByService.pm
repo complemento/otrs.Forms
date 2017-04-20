@@ -23,7 +23,7 @@ use JSON;
 use utf8;
 use vars qw($VERSION);
 $VERSION = qw($Revision: 1.55 $) [1];
-
+ use JSON::XS;
 sub new {
     my ( $Type, %Param ) = @_;
 
@@ -95,7 +95,6 @@ sub Run {
 		$Self->_Edit(
 		    Action => 'Edit',
 		    %Data,
-		#            SelectedAttachments => \@SelectedAttachment,
 		);
 		$Output .= $LayoutObject->Output(
 		    TemplateFile => 'DynamicFieldByService',
@@ -644,7 +643,6 @@ sub Run {
 		    $Error{NameServerErrorMessage} = 'This field is required';
 		}
 		# otherwise save configuration and return process screen
-		#$Kernel::OM->Get("Kernel::System::Log")->Dumper($FormsData->{ServiceID});
 		my $DfByServiceID = $DfByServiceObject->DynamicTemplateAdd(
 			Name      							=> $FormsData->{Name},
 			TypeID    							=> $FormsData->{TypeID},
@@ -840,29 +838,32 @@ sub _Edit {
             UserID => $Self->{UserID},
         );
         # if there are any services defined, they are shown
-        if ( @{$ServiceList2} ) {
-            for my $ServiceData ( @{$ServiceList2} ) {
-          	  my %Preferences = $ServiceObject->ServicePreferencesGet(
-		        ServiceID => $ServiceData->{ServiceID},
-		        UserID    => 1,
-	          );
-	#Caso o nome seja o mesmo ASSOCIADO AO CAMPO DA "FORMS" da Interface de admin de serviços 
-	#O Serviço já será setado 
-	#TO-DO
-	#Pegar o nome do Sysconfig
-		  if( defined($Preferences{Forms}) and defined($Param{ID}) and $Param{ID} eq $Preferences{Forms}){
-		
-			if(defined( $ServiceData->{ServiceID})){
-                  		push @Selection ,  $ServiceData->{ServiceID};
-			}
-    		 }
-            }   
-        }
+	if ( @{$ServiceList2} ) {
+    	for my $ServiceData ( @{$ServiceList2} ) {
+	        my %Preferences = $ServiceObject->ServicePreferencesGet(
+				ServiceID => $ServiceData->{ServiceID},
+			    UserID    => 1,
+	        );
+			#Caso o nome seja o mesmo ASSOCIADO AO CAMPO DA "FORMS" da Interface de admin de serviços 
+			#O Serviço já será setado 
+			#TO-DO
+			#Pegar o nome do Sysconfig
+			if( defined($Preferences{Forms}) and defined($Param{ID}) and $Param{ID} eq $Preferences{Forms}){
+				if(defined( $ServiceData->{ServiceID})){
+	            	push @Selection ,  $ServiceData->{ServiceID};
+				}
+	    	}
+	    }   
+	}
 #-------------------------------------#
 
     # COMPLEMENTO = SE POPUP, NÃO MOSTRA A SELEÇÃO DE SERVIÇOS
     if($Param{ViewMode} eq 'Popup'){
-        $Param{ServiceOption} = '<span class="ServiceUnderCreation">'.$LayoutObject->{LanguageObject}->Translate('Under creation').'</span>'
+    my $TreeView = 0;
+    if ( $ConfigObject->Get('Ticket::Frontend::ListType') eq 'tree' ) {
+        $TreeView = 1;
+    }
+       $Param{ServiceOption} = '<span class="ServiceUnderCreation">'.$LayoutObject->{LanguageObject}->Translate('Under creation').'</span>'
     } else {
         $Param{ServiceOption} = $LayoutObject->BuildSelection(
             Data       => \%ServiceList,
@@ -870,14 +871,10 @@ sub _Edit {
             Multiple   => 1, 
             SelectedID => \@Selection,
             Class      => ' Modernize ',
+	    TreeView       => $TreeView,
             PossibleNone=> 1,
         );
     }
-
-    #Convert Subject  in Message 
-    $Param{Message} = $Param{Subject};
-    # create interface selection
-
     $Param{InterfaceSelection} = $LayoutObject->BuildSelection(
         Data => {
             AgentInterface    => 'Agent Interface',
@@ -1195,11 +1192,10 @@ sub _Edit {
 	    }
     }
     else {
-
         # reformat from html to plain
-	$Param{Message} = $Kernel::OM->Get('Kernel::System::HTMLUtils')->ToAscii(
-		String => $Param{Message},
-	);
+		$Param{Message} = $Kernel::OM->Get('Kernel::System::HTMLUtils')->ToAscii(
+			String => $Param{Message},
+		);
     }
     return 1;
 }
@@ -1275,25 +1271,8 @@ sub _OutputActivityDialog {
 	my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 	my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
 	# Check needed parameters:
-	# ProcessEntityID only
-	# TicketID ActivityDialogEntityID
 
 	#SUBTITUIR PELO SERVICEID  
-	if ( !$Param{ServiceDynamicID} || ( !$TicketID && !$Param{ServiceDynamicID} ) ) {
-		my $Message = 'Got no ProcessEntityID or TicketID and ActivityDialogEntityID!';
-
-		# does not show header and footer again
-		if ( $Self->{IsMainWindow} ) {
-		    return $LayoutObject->Error(
-			Message => $Message,
-		    );
-		}
-	
-		$LayoutObject->FatalError(
-		    Message => $Message,
-		);
-	}
-
 	my $ActivityActivityDialog;
 	my %Ticket;
 	my %Error         = ();
@@ -1304,8 +1283,6 @@ sub _OutputActivityDialog {
 	%ErrorMessages = %{ $Param{ErrorMessages} } if ( IsHashRefWithData( $Param{ErrorMessages} ) );
 
 	# get needed objects
-	my $ActivityObject       = $Kernel::OM->Get('Kernel::System::ProcessManagement::Activity');
-	my $ActivityDialogObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::ActivityDialog');
 
 	
 	# get needed object
@@ -1315,45 +1292,21 @@ sub _OutputActivityDialog {
 	$ActivityActivityDialog =  $DfByServiceObject->GetDynamicFieldByService(ServiceID => $Param{ServiceDynamicID});
 	
 	my $ActivityDialog = $DfByServiceObject->GetDynamicFieldByServiceAndInterface(ServiceID => $Param{ServiceDynamicID},  InterfaceName   => $Param{InterfaceName} );
-	if(!$ActivityDialog){
+	if(!$ActivityDialog->{ID}){
 		return;
 	}
 
 
 
-	if ( !%Ticket && $Self->{IsProcessEnroll} ) {
-        	%Ticket = $TicketObject->TicketGet(
-	            TicketID      => $TicketID,
-	            UserID        => $Self->{UserID},
-	            DynamicFields => 1,
-	        );
-	}
+#	if ( !%Ticket && $Self->{IsProcessEnroll} ) {
+ #       	%Ticket = $TicketObject->TicketGet(
+#	            TicketID      => $TicketID,
+#	            UserID        => $Self->{UserID},
+#	            DynamicFields => 1,
+#	        );
+#	}
 
 	my $Output='';
-	my $MainBoxClass;
-	# display process iformation
-	##    # show close & cancel link if neccessary
-#   	my $Out = $LayoutObject->Output(
-#        TemplateFile => 'AgentTicketPhone',
-#        Data         => {
-#            FormName               => 'ActivityDialogDialog' . $ActivityDialog->{ActivityDialog},
-#            FormID                 => $Self->{FormID},
-#            Subaction              => 'StoreActivityDialog',
-#            TicketID               => $Ticket{TicketID} || '',
-#            ActivityDialogEntityID => $ActivityDialog->{ActivityDialog},
-#            ProcessEntityID        => $Param{ServiceDynamicID},
-#     #           || $Ticket{
-#      #          'DynamicField_'
-#      #              . $ConfigObject->Get(
-#       #             'Process::DynamicFieldProcessManagementProcessID'
-#        #            )
-#          #      },
-#            IsMainWindow    => $Self->{IsMainWindow},
-#            IsProcessEnroll => $Self->{IsProcessEnroll},
-#            MainBoxClass    => $MainBoxClass || '',
-#        },
-#    );
-
     my %RenderedFields = ();
     $Output = "";
     # get the list of fields where the AJAX loader icon should appear on AJAX updates triggered
@@ -1673,24 +1626,6 @@ sub _OutputActivityDialog {
 	                 GetParam            => $Param{GetParam},
 	             );
 
-    #	         if ( !$Response->{Success} ) {
-    #
-    #	             # does not show header and footer again
-    #	             if ( $Self->{IsMainWindow} ) {
-    #	                 return $LayoutObject->Error(
-    #	                     Message => $Response->{Message},
-    #	                 );
-    #	             }
-    #
-    #	             $LayoutObject->FatalError(
-    #	                 Message => $Response->{Message},
-    #	             );
-    #	         }
-
-    #	         $Output .= $Response->{HTML};
-
-			    $AjaxResponseJson .= $Response;
-    #	         $RenderedFields{ $Self->{NameToID}->{$CurrentField} } = 1;
 	         }
 
 	         # render Title
@@ -1880,35 +1815,49 @@ sub _OutputActivityDialog {
    	my %JsonReturn;
 	my $AgentJsonFieldConfig;
 	my $CustomerJsonFieldConfig;	
+	my $JSONObject = $Kernel::OM->Get('Kernel::System::JSON');
 	if($ActivityDialog->{TypeID}){
 		%JsonReturn = ('TypeID' => $ActivityDialog->{TypeID});
-		$Json = encode_json \%JsonReturn if(%JsonReturn);
+		$Json =  $JSONObject->Encode(
+						Data => \%JsonReturn,
+		);
 	}
 	if($ActivityDialog->{Subject}){
-		%JsonReturn	 = ('Subject' =>  $ActivityDialog->{Subject}); 
-		$JsonSubject = ",".encode_json \%JsonReturn if(%JsonReturn);
+		%JsonReturn	 = ('Subject' =>  $ActivityDialog->{Subject});
+		$JsonSubject = "@%@%@".$JSONObject->Encode(
+								Data => \%JsonReturn,
+			 				);
 	}
-
-    
 	if($ActivityDialog->{Body}){
+	    %JsonReturn  = ('Message' => $ActivityDialog->{Body});
+		$JsonMessage = "@%@%@". $JSONObject->Encode( 
+			Data => \%JsonReturn,
+		);
 		
-	    %JsonReturn  = ('Message' =>  $ActivityDialog->{Body});
-		$JsonMessage = ",".encode_json \%JsonReturn if(%JsonReturn);
+#		$JsonMessage = ",".encode_json \%JsonReturn if(%JsonReturn);
 		
 	}
 	
 	
 	if($Kernel::OM->Get('Kernel::Config')->Get('AgentDynamicFieldByService::NameBeforeField')){
 		%JsonReturn = ('AgentFieldConfig' => $Kernel::OM->Get('Kernel::Config')->Get('AgentDynamicFieldByService::NameBeforeField') );	
-		$AgentJsonFieldConfig = ",".encode_json \%JsonReturn if(%JsonReturn);
+		$AgentJsonFieldConfig = "@%@%@".encode_json \%JsonReturn if(%JsonReturn);
 
 	}	
 	if($Kernel::OM->Get('Kernel::Config')->Get('CustomerDynamicFieldByService::NameBeforeField')){
 		%JsonReturn = ('CustomerFieldConfig' => $Kernel::OM->Get('Kernel::Config')->Get('CustomerDynamicFieldByService::NameBeforeField') );	
-		$CustomerJsonFieldConfig = ",".encode_json \%JsonReturn if(%JsonReturn);
+		$CustomerJsonFieldConfig = "@%@%@".encode_json \%JsonReturn if(%JsonReturn);
 
 	}	
-	$Output .= ":\$\$:Ligero:\$\$:" . $Json . " " . $JsonSubject . " " . $JsonMessage . " " . $AgentJsonFieldConfig. " " . $CustomerJsonFieldConfig ." ".  $AjaxResponseJson;
+	$Output .= $LayoutObject->Output(
+	     Template => '[% Data.JSON %]',
+	     Data         => {
+							JSON => ":\$\$:Ligero:\$\$:" . $Json . " " . $JsonSubject . " " . $JsonMessage . " " . $AgentJsonFieldConfig. " " . $CustomerJsonFieldConfig ." ".  $AjaxResponseJson,
+
+						},
+	 );
+
+#	$Output .= ":\$\$:Ligero:\$\$:" . $Json . " " . $JsonSubject . " " . $JsonMessage . " " . $AgentJsonFieldConfig. " " . $CustomerJsonFieldConfig ." ".  $AjaxResponseJson;
 
 	return $Output;
 }
@@ -3911,7 +3860,6 @@ sub _GetParam {
     my $Value;
 
     # get activity dialog object
-    my $ActivityDialogObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::ActivityDialog');
     # create process object
 
     my 	$ActivityDialog =  $DfByServiceObject->GetDynamicFieldByService(ServiceID => $ServiceDynamicID );
