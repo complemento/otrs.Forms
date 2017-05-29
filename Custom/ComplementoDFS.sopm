@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <otrs_package version="1.0">
     <Name>ComplementoDynamicFieldByService</Name>
-    <Version>5.0.9</Version>
+    <Version>5.1.1</Version>
     <Framework>5.x.x</Framework>
     <Vendor>Complemento - Soluções em Gestão de Serviços de TI</Vendor>
     <URL>http://www.complemento.net.br/</URL>
