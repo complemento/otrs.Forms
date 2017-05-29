@@ -16,7 +16,6 @@ use strict;
 use warnings;
 use Encode qw();
 
-use Data::Dumper;
 
 use Kernel::System::VariableCheck qw(:all);
 use JSON;
@@ -858,22 +857,35 @@ sub _Edit {
 #-------------------------------------#
 
     # COMPLEMENTO = SE POPUP, NÃO MOSTRA A SELEÇÃO DE SERVIÇOS
-    if($Param{ViewMode} eq 'Popup'){
-    my $TreeView = 0;
-    if ( $ConfigObject->Get('Ticket::Frontend::ListType') eq 'tree' ) {
-        $TreeView = 1;
+
+    my $TreeView = 1;
+	if ( $ConfigObject->Get('Ticket::Frontend::ListType') eq 'tree' ) {
+		$TreeView = 1;
     }
-       $Param{ServiceOption} = '<span class="ServiceUnderCreation">'.$LayoutObject->{LanguageObject}->Translate('Under creation').'</span>'
+
+    if($Param{ViewMode} eq 'Popup'){
+     	$Param{ServiceOption} = '<span class="ServiceUnderCreation">'.$LayoutObject->{LanguageObject}->Translate('Under creation').'</span>'
     } else {
-        $Param{ServiceOption} = $LayoutObject->BuildSelection(
-            Data       => \%ServiceList,
-            Name       => 'ServiceID',
-            Multiple   => 1, 
-            SelectedID => \@Selection,
-            Class      => ' Modernize ',
-	    TreeView       => $TreeView,
-            PossibleNone=> 1,
-        );
+		if($TreeView = 1){
+   	    	$Param{ServiceOption} = $LayoutObject->BuildSelection(
+        	    Data       => \%ServiceList,
+        	    Name       => 'ServiceID',
+        	    Multiple   => 1, 
+        	    SelectedID => \@Selection,
+			    TreeView       => $TreeView,
+        	    PossibleNone=> 1,
+        	);
+		}else{
+			$Param{ServiceOption} = $LayoutObject->BuildSelection(
+        	    Data       => \%ServiceList,
+        	    Name       => 'ServiceID',
+        	    Multiple   => 1, 
+        	    SelectedID => \@Selection,
+				Class	=> "Modernize",
+			    TreeView       => $TreeView,
+        	    PossibleNone=> 1,
+        	); 
+		}
     }
     $Param{InterfaceSelection} = $LayoutObject->BuildSelection(
         Data => {

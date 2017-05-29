@@ -32,7 +32,9 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		var objectJSON;
 
 		var reloadFields = "";
-
+		if($("[name=LinkTicketID]").size() > 0 && $("[name=LinkTicketID]").val() != ""){
+			setTimeout(function(){ $('#ServiceID').trigger("change"); }, 1);
+		}
         $('#ServiceID').bind('change', function () {
 			
 			var formID ="";

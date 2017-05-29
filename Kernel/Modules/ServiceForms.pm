@@ -59,7 +59,7 @@ sub new {
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');   
 	my $HashOld = $ConfigObject->Get("Ticket::Frontend::$Action"); 
 	foreach my $Keys (keys $HashOld->{DynamicField}){
-		$HashDosCampos{$Keys} = $HashOld->{DynamicField}{$Keys};
+		$HashDosCampos{$Keys} = %{$HashOld->{DynamicField}{$Keys}};
 
 	}
     # Exemplo:
