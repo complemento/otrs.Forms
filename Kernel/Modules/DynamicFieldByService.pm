@@ -858,8 +858,10 @@ sub _Edit {
 #-------------------------------------#
 
     # COMPLEMENTO = SE POPUP, NÃO MOSTRA A SELEÇÃO DE SERVIÇOS
-    if($Param{ViewMode} eq 'Popup'){
+    
+
     my $TreeView = 0;
+    if($Param{ViewMode} eq 'Popup'){
     if ( $ConfigObject->Get('Ticket::Frontend::ListType') eq 'tree' ) {
         $TreeView = 1;
     }
