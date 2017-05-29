@@ -58,8 +58,13 @@ sub new {
     return $Self if(!%HashDosCampos);
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');   
 	my $HashOld = $ConfigObject->Get("Ticket::Frontend::$Action"); 
+<<<<<<< HEAD
 	foreach my $Keys (keys %{$HashOld->{DynamicField}}){
 		$HashDosCampos{$Keys} = $HashOld->{DynamicField}{$Keys};
+=======
+	foreach my $Keys (keys $HashOld->{DynamicField}){
+		$HashDosCampos{$Keys} = %{$HashOld->{DynamicField}{$Keys}};
+>>>>>>> 51d93ac6176743f106b70049e002cc952ab66e76
 
 	}
     # Exemplo:
