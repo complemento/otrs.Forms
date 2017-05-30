@@ -862,10 +862,11 @@ sub _Edit {
     if ( $ConfigObject->Get('Ticket::Frontend::ListType') eq 'tree' ) {
         $TreeView = 1;
     }
-    if($Param{ViewMode} eq 'Popup'){
+    if ($Param{ViewMode} eq 'Popup'){
      	$Param{ServiceOption} = '<span class="ServiceUnderCreation">'.$LayoutObject->{LanguageObject}->Translate('Under creation').'</span>'
-    } else {
-		if($TreeView = 1){
+    } 
+	else {
+		if ($TreeView eq 1){
    	    	$Param{ServiceOption} = $LayoutObject->BuildSelection(
         	    Data       => \%ServiceList,
         	    Name       => 'ServiceID',
@@ -874,7 +875,8 @@ sub _Edit {
 			    TreeView       => $TreeView,
         	    PossibleNone=> 1,
         	);
-		}else{
+		}
+		else {
 			$Param{ServiceOption} = $LayoutObject->BuildSelection(
         	    Data       => \%ServiceList,
         	    Name       => 'ServiceID',
