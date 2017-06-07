@@ -32,7 +32,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		var objectJSON;
 
 		var reloadFields = "";
-		if($("[name=LinkTicketID]").size() > 0 && $("[name=LinkTicketID]").val() != ""){
+		if($("[name=LinkTicketID]").size() > 0 && $("[name=LinkTicketID]").val() != "" || $("[name=Action]").val() == "CustomerTicketMessage" && $("#ServiceID").val() != ""){
 			setTimeout(function(){ $('#ServiceID').trigger("change"); }, 1);
 		}
         $('#ServiceID').bind('change', function () {
@@ -98,7 +98,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							$.each( objectJSON, function( key, val ) {
 								  if(key && val){
 									if(key === "Message"){
-										console.log(val);
 										window.CKEDITOR.instances['RichText'].setData(val);
 									    reloadFields += ""+key+",";
 									}else if(key === "AgentFieldConfig"){

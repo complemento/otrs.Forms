@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <otrs_package version="1.0">
     <Name>Forms</Name>
-    <Version>5.1.2</Version>
+    <Version>5.1.3</Version>
     <Framework>5.x.x</Framework>
     <Vendor>Complemento [Enterprise]</Vendor>
     <URL>http://www.complemento.net.br/</URL>
@@ -37,7 +37,7 @@
 	<File Permission="644" Location="Kernel/System/DynamicFieldByService.pm"></File>
 	<File Permission="644" Location="Kernel/Output/HTML/Templates/Standard/LigeroAdminServiceFormsJS.tt"></File>
 	<File Permission="644" Location="Kernel/Output/HTML/ServicePreferences/LigeroServiceForms.pm"></File>
-	<File Permission="644" Location="var/packagesetup/ComplementoDynamicFieldByService.pm"></File>
+	<File Permission="644" Location="var/packagesetup/Forms.pm"></File>
      </Filelist>
     <DatabaseInstall Type="post">
 	<TableCreate Name="dfs" Type="post">
