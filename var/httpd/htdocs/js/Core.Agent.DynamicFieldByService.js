@@ -1,5 +1,4 @@
 // --
-// Copyright (C) 2001-2015 OTRS AG, http://otrs.com/
 // --
 // This software comes with ABSOLUTELY NO WARRANTY. For details, see
 // the enclosed file COPYING for license information (AGPL). If you
@@ -60,7 +59,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                 });
             }
             if ($('#ServiceID').val()) {
-				$('.ComplementoDFS').each(function(){
+				$('.AddDFS').each(function(){
 					var $that =  $(this);
 	                	$($that).parent().parent().fadeOut(400, function() {
 		       	            $($that).parent().parent().empty();
@@ -84,7 +83,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 					if(Response == 0){
 						return;
 					}
-					var res = Response.split(':$$:Ligero:$$:');
+					var res = Response.split(':$$:Add:$$:');
 					//LOOP QUE PEGA OS VALORES E OS NOMES 
 						Response = res[0];
 						var i;
@@ -93,6 +92,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						reloadFields = "";
 						var AgentFieldConfigInsert  = ".SpacingTop:first";
 						var CustomerFieldConfigInsert = "#BottomActionRow";
+						//var valObj = ["Dest","StateID","SLAID","TypeID"];
 						for( i=0; i < arrayJSON.length; i++){
 							objectJSON = $.parseJSON(arrayJSON[i]);
 							$.each( objectJSON, function( key, val ) {
@@ -102,10 +102,16 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									    reloadFields += ""+key+",";
 									}else if(key === "AgentFieldConfig"){
 										AgentFieldConfigInsert = ""+val+"";
+									//}else if(valObj.indexOf(key) >= 0){
 									}
+
 									else if($('#'+key).size() > 0){
-										$('#'+key).val(val);	
+										//$('#'+key).val(val);	
 										reloadFields += ""+key+",";
+										$('#'+key).val(val);
+										Core.UI.InputFields.Deactivate($('#'+key));
+										Core.UI.InputFields.Activate($('#'+key));
+
 									}
 									if(key === "CustomerFieldConfig"){
 										CustomerFieldConfigInsert =  ""+val+"";
@@ -127,6 +133,11 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
         	            JavaScriptString = '',
         	            ErrorMessage;
 
+
+////////////////////////////////////////////////////////
+			Core.UI.InputFields.Deactivate();
+			Core.UI.InputFields.Activate();
+//////////////////////////////////////////////////
                     if (!Response) {
 
                         // We are out of the OTRS App scope, that's why an exception would not be caught. Therefor we handle the error manually.
@@ -199,7 +210,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
             }
             else {
-				$('.ComplementoDFS').each(function(){
+				$('.AddDFS').each(function(){
 					var $that =  $(this);
 	                	$($that).parent().parent().fadeOut(400, function() {
 		       	            $($that).parent().parent().empty();

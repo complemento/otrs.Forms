@@ -1,6 +1,5 @@
 # --
 # AdminAutoTicket.tt - provides HTML form for AdminAutoTicket
-# Copyright (C) 2001-2012 OTRS AG, http://otrs.org/
 # --
 # $Id: AdminAutoTicket.dtl,v 1.37 2012/03/01 12:50:13 mg Exp $
 # --
@@ -172,17 +171,25 @@
                             </div>
                             <div class="Clear"></div>
 
-                        <label class="" for="TypeID"> [% Translate("Ticket Type") | html %]:</label>
+                        <label class="Mandatory" for="ServiceID"><span class="Marker">*</span> [% Translate("Service") | html %]:</label>
+                        <div class="Field">
+                            [% Data.ServiceOption %]
+                        </div>
+						<div id="ServiceIDError" class="TooltipErrorMessage">
+							<p>[% Translate("This field is required.") | html %]</p>
+						</div>
+						<div id="ServiceIDServerError" class="TooltipErrorMessage">
+							<p>[% Translate("This field is required.") | html %]</p>
+						</div>
+
+                        <div class="Clear"></div>
+
+                        <label for="TypeID"> [% Translate("Ticket Type") | html %]:</label>
                         <div class="Field">
                             [% Data.TypeOption %]
                         </div>
                         <div class="Clear"></div>
 
-                        <label for="ServiceID"> [% Translate("Service") | html %]:</label>
-                        <div class="Field">
-                            [% Data.ServiceOption %]
-                        </div>
-                        <div class="Clear"></div>
 
                         <label class="" for="Subject">[% Translate("Subject") | html %]:</label>
                         <div class="Field">
@@ -345,10 +352,10 @@
 [% WRAPPER JSOnDocumentComplete %]
 <script type="text/javascript">//<![CDATA[
 //Core.Agent.Admin.ProcessManagement.InitActivityDialogEdit();
-Core.Agent.Admin.ComplementoDynamicFieldByService.InitActivityDialogEdit();        
+Core.Agent.Admin.AddDynamicFieldByService.InitActivityDialogEdit();        
 //Localizations
 //Core.Agent.Admin.ProcessManagement.Localization = {
-Core.Agent.Admin.ComplementoDynamicFieldByService.Localization = {
+Core.Agent.Admin.AddDynamicFieldByService.Localization = {
         CancelMsg: "[% Translate("Cancel") | html %]",
         SaveMsg: "[% Translate("Save") | html %]",
         DialogTitle: "[% Translate("Edit Field Details") | html %]",
