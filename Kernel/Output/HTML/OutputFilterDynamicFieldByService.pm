@@ -1,6 +1,4 @@
 # --
-# Copyright (C) 2011 - 2017 Complemento - Liberdade e Tecnologia http://www.complemento.net.br
-# --
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
