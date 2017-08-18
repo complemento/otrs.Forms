@@ -1,5 +1,4 @@
 // --
-// Copyright (C) 2001-2015 OTRS AG, http://otrs.com/
 // --
 // This software comes with ABSOLUTELY NO WARRANTY. For details, see
 // the enclosed file COPYING for license information (AGPL). If you
@@ -21,7 +20,7 @@ Core.Agent.Admin = Core.Agent.Admin || {};
  * @description
  *      This namespace contains the special module functions for the ProcessManagement module.
  */
-Core.Agent.Admin.ComplementoDynamicFieldByService = (function (TargetNS) {
+Core.Agent.Admin.AddDynamicFieldByService = (function (TargetNS) {
     /**
      * @private
      * @name InitProcessPopups
@@ -999,7 +998,7 @@ Core.Agent.Admin.ComplementoDynamicFieldByService = (function (TargetNS) {
      *      Initialize activity dialog edit screen.
      */
     TargetNS.InitActivityDialogEdit = function () {
-        var MandatoryFields = ['Queue', 'State', 'Lock', 'Priority', 'Type', 'CustomerID'],
+        var MandatoryFields = ['Queue', 'State', 'Lock', 'Priority', 'Type', 'CustomerID', 'SLA'],
             FieldsWithoutDefaultValue = ['CustomerID', 'Article'];
 
         function UpdateFields(Event, UI) {
@@ -1136,6 +1135,11 @@ Core.Agent.Admin.ComplementoDynamicFieldByService = (function (TargetNS) {
                     .find('option[value=1]').remove()
                     .end()
                     .val('2');
+
+				// Comp - set default value instead of "show"
+                $('#Display')
+                    .find('option[value=2]').text("Set Default Value");
+                    
             }
             // otherwise set "Show Field" as default
             else {
@@ -1576,6 +1580,6 @@ Core.Agent.Admin.ComplementoDynamicFieldByService = (function (TargetNS) {
     };
 
     return TargetNS;
-}(Core.Agent.Admin.ComplementoDynamicFieldByService || {}));
+}(Core.Agent.Admin.AddDynamicFieldByService || {}));
 
 /*eslint-enable no-window*/

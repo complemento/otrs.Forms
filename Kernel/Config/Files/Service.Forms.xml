@@ -2,7 +2,7 @@
 <otrs_config version="1.0" init="Application">
     <ConfigItem Name="PreApplicationModule###ServiceForms" Required="1" Valid="1" ConfigLevel="300">
         <Description Translatable="1">Defines a useful module to load specific user options or to display news.</Description>
-        <Group>LigeroServiceCatalog</Group>
+        <Group>Forms</Group>
         <SubGroup>Frontend::Agent</SubGroup>
         <Setting>
             <String Regex="">Kernel::Modules::ServiceForms</String>
@@ -10,7 +10,7 @@
     </ConfigItem>
     <ConfigItem Name="CustomerPanelPreApplicationModule###ServiceForms" Required="1" Valid="1">
         <Description Translatable="1">This module and its PreRun() function will be executed, if defined, for every request. This module is useful to check some user options or to display news about new applications.</Description>
-        <Group>LigeroServiceCatalog</Group>
+        <Group>Forms</Group>
         <SubGroup>Frontend::Customer</SubGroup>
         <Setting>
             <String Regex="">Kernel::Modules::ServiceForms</String>
@@ -18,11 +18,11 @@
     </ConfigItem>
        <ConfigItem Name="ServicePreferences###FormsAssociation" Required="1" Valid="1">
         <Description Translatable="1">Parameters of the example service attribute Comment2.</Description>
-        <Group>LigeroServiceCatalog</Group>
+        <Group>Forms</Group>
         <SubGroup>Frontend::Service::Preferences</SubGroup>
         <Setting>
             <Hash>
-                <Item Key="Module">Kernel::Output::HTML::ServicePreferences::LigeroServiceForms</Item>
+                <Item Key="Module">Kernel::Output::HTML::ServicePreferences::ServiceForms</Item>
                 <Item Key="Label" Translatable="1">Custom Form for this Service</Item>
 <!--                <Item Key="Desc" Translatable="1">Associação com o Forms</Item>-->
                 <Item Key="Block">Option</Item>
