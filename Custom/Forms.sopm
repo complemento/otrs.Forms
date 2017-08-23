@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <otrs_package version="1.0">
     <Name>Forms</Name>
-    <Version>5.1.2</Version>
+    <Version>5.2.1</Version>
     <Framework>5.x.x</Framework>
     <Vendor>Complemento [Enterprise]</Vendor>
     <URL>http://www.complemento.net.br/</URL>
@@ -24,20 +24,20 @@
 
 
     <Filelist>
-	<File Permission="644" Location="Kernel/Config/Files/ComplementoDynamicFieldByService.xml"></File>        
-	<File Permission="644" Location="Kernel/Config/Files/Ligero.Service.Forms.xml"></File> 
+	<File Permission="644" Location="Kernel/Config/Files/DynamicFieldByService.xml"></File>        
+	<File Permission="644" Location="Kernel/Config/Files/Service.Forms.xml"></File> 
 	<File Permission="644" Location="Kernel/Modules/DynamicFieldByService.pm"></File> 
 	<File Permission="644" Location="Kernel/Modules/ServiceForms.pm"></File> 
-	<File Permission="644" Location="var/httpd/htdocs/js/Core.Agent.Admin.ComplementoDynamicFieldByService.js"></File>
+	<File Permission="644" Location="var/httpd/htdocs/js/Core.Agent.Admin.DynamicFieldByService.js"></File>
 	<File Permission="644" Location="var/httpd/htdocs/js/Core.Agent.DynamicFieldByService.js"></File>
 	<File Permission="644" Location="Kernel/Output/HTML/OutputFilterDynamicFieldByService.pm"></File>
 	<File Permission="644" Location="Kernel/Output/HTML/Templates/Standard/DynamicFieldByService.tt"></File>
  	<File Permission="644" Location="Kernel/Output/HTML/Templates/Standard/ShowDynamicFieldByService.tt"></File>
 	<File Permission="644" Location="Custom/Forms.sopm"></File>
 	<File Permission="644" Location="Kernel/System/DynamicFieldByService.pm"></File>
-	<File Permission="644" Location="Kernel/Output/HTML/Templates/Standard/LigeroAdminServiceFormsJS.tt"></File>
-	<File Permission="644" Location="Kernel/Output/HTML/ServicePreferences/LigeroServiceForms.pm"></File>
-	<File Permission="644" Location="var/packagesetup/ComplementoDynamicFieldByService.pm"></File>
+	<File Permission="644" Location="Kernel/Output/HTML/Templates/Standard/AdminServiceFormsJS.tt"></File>
+	<File Permission="644" Location="Kernel/Output/HTML/ServicePreferences/ServiceForms.pm"></File>
+	<File Permission="644" Location="var/packagesetup/Forms.pm"></File>
      </Filelist>
     <DatabaseInstall Type="post">
 	<TableCreate Name="dfs" Type="post">
@@ -52,7 +52,7 @@
         <Column Name="change_by" 	Required="true" Type="INTEGER"></Column>
      	<Column Name="subject"   	Required="false" Size="255" Type="VARCHAR"></Column>
      	<Column Name="body"			Required="false" Type="TEXT"> </Column>	
-   		<Column Name="type_id" 		Required="false" Type="INTEGER"></Column>
+   		<Column Name="type_id" 		Required="false" Size="3" Type="VARCHAR"></Column>
      	<Column Name="workflow_id" 	Required="true" Type="INTEGER"></Column>
      	<Column Name="frontend" 	Required="true" Size="255" Type="VARCHAR"></Column>
 	    <Column Name="config" 		Required="true" Size="255" Type="longblob"></Column>
@@ -79,7 +79,7 @@
         <Column Name="change_by" 	Required="true" Type="INTEGER"></Column>
      	<Column Name="subject"   	Required="false" Size="255" Type="VARCHAR"></Column>
      	<Column Name="body"			Required="false" Type="TEXT"> </Column>	
-   		<Column Name="type_id" 		Required="false" Type="INTEGER"></Column>
+   		<Column Name="type_id" 		Required="false" Size="3" Type="VARCHAR"></Column>
      	<Column Name="workflow_id" 	Required="true" Type="INTEGER"></Column>
      	<Column Name="frontend" 	Required="true" Size="255" Type="VARCHAR"></Column>
 	    <Column Name="config" 		Required="true" Size="255" Type="longblob"></Column>
@@ -91,34 +91,11 @@
                         <Reference Foreign="id" Local="change_by">      </Reference>
                 </ForeignKey>
         </TableCreate>
-
 	</DatabaseReinstall>
  	<DatabaseUpgrade Type="post">
-	<TableCreate Name="dfs" Type="post">
-	   	<Column AutoIncrement="true" Name="id" PrimaryKey="true" Required="true" Type="INTEGER"></Column>
-        <Column Name="name" 		Required="true" Size="100" Type="VARCHAR"></Column>
-     	<Column Name="comments" 	Required="true" Size="255" Type="VARCHAR"></Column>
-		<Column Name="valid_id"	 	Required="true" Type="INTEGER"></Column>
-     	<Column Name="content_type" Required="true" Size="255" Type="VARCHAR"></Column>
-     	<Column Name="create_time" 	Required="true" Type="DATE"></Column>
-        <Column Name="create_by" 	Required="true" Type="INTEGER"></Column>
-        <Column Name="change_time" 	Required="true" Type="DATE"></Column>
-        <Column Name="change_by" 	Required="true" Type="INTEGER"></Column>
-     	<Column Name="subject"   	Required="false" Size="255" Type="VARCHAR"></Column>
-     	<Column Name="body"			Required="false" Type="TEXT"> </Column>	
-   		<Column Name="type_id" 		Required="false" Type="INTEGER"></Column>
-     	<Column Name="workflow_id" 	Required="true" Type="INTEGER"></Column>
-     	<Column Name="frontend" 	Required="true" Size="255" Type="VARCHAR"></Column>
-	    <Column Name="config" 		Required="true" Size="255" Type="longblob"></Column>
-               <Unique>
-                     <UniqueColumn Name="name">      </UniqueColumn>
-                </Unique>
-                <ForeignKey ForeignTable="users">
-                	<Reference Foreign="id" Local="create_by">      </Reference>
-                        <Reference Foreign="id" Local="change_by">      </Reference>
-                </ForeignKey>
-        </TableCreate>
-
+		<TableAlter Name="dfs" Type="post">
+			<ColumnChange NameOld="type_id" NameNew="type_id" Required="false" Size="3" Type="VARCHAR"></ColumnChange>
+        </TableAlter>
     </DatabaseUpgrade>
 
 </otrs_package>

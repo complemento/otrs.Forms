@@ -2,7 +2,7 @@
 <otrs_config version="1.0" init="Application">
     <ConfigItem Name="Frontend::Output::FilterElementPost###DynamicFieldByService" Required="0" Valid="1">
         <Description Translatable="1">Loader the module in the currents interfaces.</Description>
-        <Group>LigeroServiceCatalog</Group>
+        <Group>Forms</Group>
         <SubGroup>OutputFilter</SubGroup>
         <Setting>
             <Hash>
@@ -20,7 +20,7 @@
     </ConfigItem>
     <ConfigItem Name="AgentDynamicFieldByService::NameBeforeField" Required="1" Valid="1">
         <Description Translatable="1">Name of the field that action will occurs before  .</Description>
-        <Group>LigeroServiceCatalog</Group>
+        <Group>Forms</Group>
         <SubGroup>Core</SubGroup>
         <Setting>
 		<String>fieldset div:last</String>
@@ -28,7 +28,7 @@
     </ConfigItem>
     <ConfigItem Name="CustomerDynamicFieldByService::NameBeforeField" Required="1" Valid="1">
         <Description Translatable="1">In this field  is possible define where new field will be show .</Description>
-        <Group>LigeroServiceCatalog</Group>
+        <Group>Forms</Group>
         <SubGroup>Core</SubGroup>
         <Setting>
 		<String>.RichTextHolder</String>
@@ -37,7 +37,7 @@
 
     <ConfigItem Name="Frontend::Module###DynamicFieldByService" Required="0" Valid="1">
         <Description Translatable="1">Frontend module registration for the agent interface.</Description>
-        <Group>LigeroServiceCatalog</Group>
+        <Group>Forms</Group>
         <SubGroup>Frontend::Admin::ModuleRegistration</SubGroup>
         <Setting>
             <FrontendModuleReg>
@@ -55,7 +55,7 @@
 		<Loader>
                		<CSS>Core.Agent.Admin.ProcessManagement.css</CSS>
 		        <CSS>Core.AllocationList.css</CSS>
-	                <JavaScript>Core.Agent.Admin.ComplementoDynamicFieldByService.js</JavaScript>
+	                <JavaScript>Core.Agent.Admin.DynamicFieldByService.js</JavaScript>
         	        <JavaScript>Core.UI.AllocationList.js</JavaScript>
 
 		</Loader>
@@ -65,11 +65,10 @@
 
     <ConfigItem Name="CustomerFrontend::Module###DynamicFieldByService" Required="0" Valid="1">
         <Description Translatable="1">Frontend module registration for the customer interface.</Description>
-        <Group>LigeroServiceCatalog</Group>
+        <Group>Forms</Group>
         <SubGroup>Frontend::Customer::ModuleRegistration</SubGroup>
         <Setting>
             <FrontendModuleReg>
-                <Group>admin</Group>
                 <Description>Admin</Description>
                 <Title>Article Template</Title>
                 <NavBarName>Admin</NavBarName>

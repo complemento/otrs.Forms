@@ -4,7 +4,7 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-package var::packagesetup::ComplementoDynamicFieldByService;
+package var::packagesetup::Forms;
 
 use strict;
 use warnings;

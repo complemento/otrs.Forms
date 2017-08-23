@@ -5,7 +5,7 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-package Kernel::Output::HTML::ServicePreferences::LigeroServiceForms;
+package Kernel::Output::HTML::ServicePreferences::ServiceForms;
 
 use strict;
 use warnings;
@@ -59,7 +59,7 @@ sub Param {
     $OptionHtml .= '<span style="margin-left: 5px;"><a href="'.$Baselink.'?Action=DynamicFieldByService;Subaction=Add;ViewMode=Popup" class="AsPopup PopupType_TicketAction" title="Fechar este Chamado"><i class="fa fa-plus-square" aria-hidden="true"></i></a></span>';
     
     $LayoutObject->Output(
-        TemplateFile => 'LigeroAdminServiceFormsJS',
+        TemplateFile => 'AdminServiceFormsJS',
         Data         => {}
     );
     

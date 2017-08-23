@@ -16,11 +16,12 @@ use utf8;
 our $ObjectManagerDisabled = 1;
 
 sub new {
-    my ( $Type, %Param ) = @_;
-
+	my ( $Type, %Param ) = @_;
+	
     # allocate new hash for object
     my $Self = {%Param};
     bless( $Self, $Type );
+	
 
     my $Action = $Self->{Action}||'';
     
@@ -32,9 +33,10 @@ sub new {
     my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
     # Verifica se há o parametro ServiceID
     my $ServiceID  = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam( Param => 'ServiceID' ) || '';
-    
+	my $Subaction = $Self->{Subaction} || '';	    
+	 
     # Para execução se não houver ServiceID
-    if($ServiceID eq ''){
+    if($ServiceID eq '' or $Subaction eq ''){
         return $Self;
     }
     my $DynamicFieldsByService = $DfByServiceObject->GetDynamicFieldByService(ServiceID => $ServiceID);
