@@ -1334,7 +1334,6 @@ sub _OutputActivityDialog {
 #    }
 
     #    # Loop through ActivityDialogFields and render their output
-
 	    DIALOGFIELD:
 	    for my $CurrentField ( @{ $ActivityDialog->{Config}{FieldOrder} } ) {
 
@@ -1365,7 +1364,7 @@ sub _OutputActivityDialog {
 		
             if ( $CurrentField =~ m{^DynamicField_(.*)}xms ) {
 
-              		my $DynamicFieldName = $1;
+             	my $DynamicFieldName = $1;
 			    my $Response         = $Self->_RenderDynamicField(
 				    ActivityDialogField => $ActivityDialog->{Config}{Fields}{$CurrentField},
 				    FieldName           => $DynamicFieldName,
@@ -1419,8 +1418,6 @@ sub _OutputActivityDialog {
 					    Action				=> $Self->{Action},
 		        );
       		    $AjaxResponseJson .= $Response;
-$Kernel::OM->Get('Kernel::System::Log')->Log( Priority => 'error', Message => "aaaaaaaaaaaa lililili $Response" );
-    #
             	}
 
 		    # render Queue
@@ -1505,7 +1502,6 @@ $Kernel::OM->Get('Kernel::System::Log')->Log( Priority => 'error', Message => "a
             # render SLA
             elsif ( $Self->{NameToID}->{$CurrentField} eq 'SLAID' )
             {
-				$Kernel::OM->Get('Kernel::System::Log')->Log( Priority => 'error', Message => "aaaaaaaaaaaa 1111111111111" );
 		    next DIALOGFIELD if $RenderedFields{ $Self->{NameToID}->{$CurrentField} };
 		    # Pq existia o next abaixo?
 		    #next DIALOGFIELD;
@@ -4686,7 +4682,7 @@ sub _GetAJAXUpdatableFields {
         my $FieldData = $Param{ActivityDialogFields}->{$Field};
 
         # skip hidden fields
-        next FIELD if !$FieldData->{Display};
+#        next FIELD if !$FieldData->{Display};
 
         # for Dynamic Fields check if is AJAXUpdatable
         if ( $Field =~ m{^DynamicField_(.*)}xms ) {

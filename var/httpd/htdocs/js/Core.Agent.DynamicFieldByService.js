@@ -199,6 +199,43 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                         $('#AJAXLoader').addClass('Hidden');
                         $('#AJAXDialog').val('1');
 
+						$(".AddDFS").each(function() { 
+						
+						
+						    if($(this).hasClass('DateSelection') || $(this).hasClass('Validate_MaxLength'))
+						    {
+						   		return true;
+						    }
+						
+						    var formId = {};
+						    var id = $(this).attr('id');
+						
+						    var formID ="";
+						    $("form").each(function(){
+						    	if($(this).attr("name") == "compose"){ 
+						    		formID = $(this).attr("id");
+						    	}
+						    });
+						
+						    var $inputs = $('#'+formID +' :input');
+						
+						   
+						    var ids = [];
+						
+						    $inputs.each(function (index)
+						    {
+							    
+						    	
+								if (typeof $(this).attr('id') != 'undefined' && typeof $(this).attr('name') != 'undefined' ) {
+							    	ids.push( $(this).attr('id'));
+						        }
+						    });
+						 	$('#'+id).bind('change', function (Event) {
+						        Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id,ids );
+						    });
+						
+						
+						});
                     }
                     else {
 
