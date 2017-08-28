@@ -81,6 +81,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                     Data,
                     function (Response) {
 					if(Response == 0){
+
+						window.CKEDITOR.instances['RichText'].setData('');
 						return;
 					}
 					var res = Response.split(':$$:Add:$$:');
