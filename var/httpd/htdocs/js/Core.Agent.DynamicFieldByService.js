@@ -80,9 +80,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                     Core.Config.Get('CGIHandle'),
                     Data,
                     function (Response) {
-					if(Response == 0){
-
-						window.CKEDITOR.instances['RichText'].setData('');
+					if(Response == 0)
+					{
 						return;
 					}
 					var res = Response.split(':$$:Add:$$:');
@@ -104,11 +103,9 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									    reloadFields += ""+key+",";
 									}else if(key === "AgentFieldConfig"){
 										AgentFieldConfigInsert = ""+val+"";
-									//}else if(valObj.indexOf(key) >= 0){
 									}
 
 									else if($('#'+key).size() > 0){
-										//$('#'+key).val(val);	
 										reloadFields += ""+key+",";
 										$('#'+key).val(val);
 										Core.UI.InputFields.Deactivate($('#'+key));

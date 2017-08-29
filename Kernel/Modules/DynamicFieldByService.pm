@@ -1842,7 +1842,7 @@ sub _OutputActivityDialog {
 								Data => \%JsonReturn,
 			 				);
 	}
-	if($ActivityDialog->{Body}){
+	 $ActivityDialog->{Body} = " " if(!$ActivityDialog->{Body});
 	    %JsonReturn  = ('Message' => $ActivityDialog->{Body});
 		$JsonMessage = "@%@%@". $JSONObject->Encode( 
 			Data => \%JsonReturn,
@@ -1850,7 +1850,7 @@ sub _OutputActivityDialog {
 		
 #		$JsonMessage = ",".encode_json \%JsonReturn if(%JsonReturn);
 		
-	}
+#	}
 	
 	
 	if($Kernel::OM->Get('Kernel::Config')->Get('AgentDynamicFieldByService::NameBeforeField')){
