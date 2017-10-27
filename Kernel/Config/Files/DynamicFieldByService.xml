@@ -41,7 +41,7 @@
         <SubGroup>Frontend::Admin::ModuleRegistration</SubGroup>
         <Setting>
             <FrontendModuleReg>
-                <Group>admin</Group>
+                <Group></Group>
                 <Description>Admin</Description>
                 <Title>Dynamic Field By Service</Title>
                 <NavBarName>Admin</NavBarName>
