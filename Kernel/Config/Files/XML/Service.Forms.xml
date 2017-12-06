@@ -1,26 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<otrs_config version="1.0" init="Application">
-    <ConfigItem Name="PreApplicationModule###ServiceForms" Required="1" Valid="1" ConfigLevel="300">
+<otrs_config version="2.0" init="Application">
+    <Setting Name="PreApplicationModule###ServiceForms" Required="1" Valid="1" ConfigLevel="300">
         <Description Translatable="1">Defines a useful module to load specific user options or to display news.</Description>
-        <Group>Forms</Group>
-        <SubGroup>Frontend::Agent</SubGroup>
-        <Setting>
-            <String Regex="">Kernel::Modules::ServiceForms</String>
-        </Setting>
-    </ConfigItem>
-    <ConfigItem Name="CustomerPanelPreApplicationModule###ServiceForms" Required="1" Valid="1">
+        <Navigation>Frontend::Agent</Navigation>
+        <Value>
+            <Item ValueType="String" ValueRegex="">Kernel::Modules::ServiceForms</Item>
+        </Value>
+    </Setting>
+    <Setting Name="CustomerPanelPreApplicationModule###ServiceForms" Required="1" Valid="1">
         <Description Translatable="1">This module and its PreRun() function will be executed, if defined, for every request. This module is useful to check some user options or to display news about new applications.</Description>
-        <Group>Forms</Group>
-        <SubGroup>Frontend::Customer</SubGroup>
-        <Setting>
-            <String Regex="">Kernel::Modules::ServiceForms</String>
-        </Setting>
-    </ConfigItem>
-       <ConfigItem Name="ServicePreferences###FormsAssociation" Required="1" Valid="1">
+        <Navigation>Frontend::Customer</Navigation>
+        <Value>
+            <Item ValueType="String" ValueRegex="">Kernel::Modules::ServiceForms</Item>
+        </Value>
+    </Setting>
+       <Setting Name="ServicePreferences###FormsAssociation" Required="1" Valid="1">
         <Description Translatable="1">Parameters of the example service attribute Comment2.</Description>
-        <Group>Forms</Group>
-        <SubGroup>Frontend::Service::Preferences</SubGroup>
-        <Setting>
+        <Navigation>Core::Service</Navigation>
+        <Value>
             <Hash>
                 <Item Key="Module">Kernel::Output::HTML::ServicePreferences::ServiceForms</Item>
                 <Item Key="Label" Translatable="1">Custom Form for this Service</Item>
@@ -28,7 +25,7 @@
                 <Item Key="Block">Option</Item>
                 <Item Key="PrefKey">Forms</Item>
             </Hash>
-        </Setting>
-    </ConfigItem>
+        </Value>
+    </Setting>
 
 </otrs_config>
