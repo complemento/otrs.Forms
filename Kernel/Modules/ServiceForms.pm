@@ -55,9 +55,9 @@ sub new {
         $IsUpload                = 1;
     }
     # Para execução se não houver ServiceID
-    if($IsUpload){
+    #if($IsUpload){
         #return $Self;
-    }
+    #}
 
     my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
     # Verifica se há o parametro ServiceID

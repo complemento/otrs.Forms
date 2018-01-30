@@ -61,7 +61,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
             if ($('#ServiceID').val()) {
 				$('.AddDFS').each(function(){
 					var $that =  $(this);
-	                	$($that).parent().parent().fadeOut(400, function() {
+                    $($that).parent().parent().fadeOut(400, function() {
 		       	            $($that).parent().parent().empty();
 	        		});
 				});
@@ -80,170 +80,188 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                     Core.Config.Get('CGIHandle'),
                     Data,
                     function (Response) {
-					if(Response == 0)
-					{
-						return;
-					}
-					var res = Response.split(':$$:Add:$$:');
-					//LOOP QUE PEGA OS VALORES E OS NOMES 
-                    var IsUpload = Core.Config.Get('LigeroFormsIsUpload');
-                    Core.Config.Set('LigeroFormsIsUpload');
-                    Response = res[0];
-                    var i;
-                    arrayJSON = res[1].split('@%@%@');
-                    objectJSON;
-                    reloadFields = "";
-                    var AgentFieldConfigInsert  = ".SpacingTop:first";
-                    var CustomerFieldConfigInsert = "#BottomActionRow";
-                    //var valObj = ["Dest","StateID","SLAID","TypeID"];
-                    for( i=0; i < arrayJSON.length; i++){
-                        objectJSON = $.parseJSON(arrayJSON[i]);
-                        $.each( objectJSON, function( key, val ) {
-                            if(key && val){
-                                    if(key === "Message"){
-                                        !IsUpload && window.CKEDITOR.instances['RichText'].setData(val);
-                                        reloadFields += ""+key+",";
-                                    }else if(key === "AgentFieldConfig"){
-                                        AgentFieldConfigInsert = ""+val+"";
-                                    }
-                                    else if($('#'+key).size() > 0){
-                                        reloadFields += ""+key+",";
-                                        !IsUpload && $('#'+key).val(val);
-                                        Core.UI.InputFields.Deactivate($('#'+key));
-                                        Core.UI.InputFields.Activate($('#'+key));
-                                    }
-                                    if(key === "CustomerFieldConfig"){
-                                        CustomerFieldConfigInsert =  ""+val+"";
-                                    }	
-                            }
+                        if(Response == 0)
+                        {
+                            return;
+                        }
+                        var res = Response.split(':$$:Add:$$:');
+                        //LOOP QUE PEGA OS VALORES E OS NOMES 
+                        var IsUpload = Core.Config.Get('LigeroFormsIsUpload');
+                        Core.Config.Set('LigeroFormsIsUpload');
+                        Response = res[0];
+                        var i;
+                        arrayJSON = res[1].split('@%@%@');
+                        objectJSON;
+                        reloadFields = "";
+                        var AgentFieldConfigInsert  = ".SpacingTop:first";
+                        var CustomerFieldConfigInsert = "#BottomActionRow";
+                        //var valObj = ["Dest","StateID","SLAID","TypeID"];
+                        for( i=0; i < arrayJSON.length; i++){
+                            objectJSON = $.parseJSON(arrayJSON[i]);
+                            $.each( objectJSON, function( key, val ) {
+                                if(key && val){
+                                        if(key === "Message"){
+                                            !IsUpload && window.CKEDITOR.instances['RichText'].setData(val);
+                                            reloadFields += ""+key+",";
+                                        }else if(key === "AgentFieldConfig"){
+                                            AgentFieldConfigInsert = ""+val+"";
+                                        }
+                                        else if($('#'+key).size() > 0){
+                                            reloadFields += ""+key+",";
+                                            !IsUpload && $('#'+key).val(val);
+                                            Core.UI.InputFields.Deactivate($('#'+key));
+                                            Core.UI.InputFields.Activate($('#'+key));
+                                        }
+                                        if(key === "CustomerFieldConfig"){
+                                            CustomerFieldConfigInsert =  ""+val+"";
+                                        }	
+                                }
 
-                        });
-                    }
-                    reloadFields = reloadFields.substring(0,reloadFields.length - 1);
-                    //Core.AJAX.FormUpdate($('#'+formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
-                    var FieldConfigInsert = "";
-                    if(formID === "NewCustomerTicket"){
-                        FieldConfigInsert = CustomerFieldConfigInsert;
-                    }else{
-                         FieldConfigInsert =  AgentFieldConfigInsert;
-                    } 	
-                
-                    var $ElementToUpdate = $(Response).insertBefore(FieldConfigInsert),
-                    JavaScriptString = '',
-                    ErrorMessage;
+                            });
+                        }
+                        reloadFields = reloadFields.substring(0,reloadFields.length - 1);
+                        //Core.AJAX.FormUpdate($('#'+formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
+                        var FieldConfigInsert = "";
+                        if(formID === "NewCustomerTicket"){
+                            FieldConfigInsert = CustomerFieldConfigInsert;
+                        }else{
+                             FieldConfigInsert =  AgentFieldConfigInsert;
+                        } 	
+                        
+                        var PreviousValues = {};
+                        
+                        if(IsUpload){
+                            // Get form values previously filled and remove default fields
+                            $('.AddDFS',$(Response)).each(function(){
+                                PreviousValues[$(this).attr('id')] = $('#'+$(this).attr('id')).val();
+                                // Remove default fields
+                                var $that = $('#'+$(this).attr('id'));
+                                $($that).parent().parent().fadeOut(400, function() {
+                                        $($that).parent().parent().empty();
+                                });
+                            });
+                            
+                        }
+                        var $ElementToUpdate = $(Response).insertBefore(FieldConfigInsert),
+                        JavaScriptString = '',
+                        ErrorMessage;
 
+                        // Set Previous values if any
+                        $.each(PreviousValues, function(index, value) {
+                            $('#'+index).val(value);
+                        }); 
 
 ////////////////////////////////////////////////////////
-                    Core.UI.InputFields.Deactivate();
-                    Core.UI.InputFields.Activate();
+                        Core.UI.InputFields.Deactivate();
+                        Core.UI.InputFields.Activate();
 //////////////////////////////////////////////////
-                    if (!Response) {
+                        if (!Response) {
 
-                        // We are out of the OTRS App scope, that's why an exception would not be caught. Therefor we handle the error manually.
-//                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No content received.", 'CommunicationError'));
-                        $('#AJAXLoader').addClass('Hidden');
-                    }
-                    else if ($ElementToUpdate && isJQueryObject($ElementToUpdate) && $ElementToUpdate.length) {
-                        $ElementToUpdate.find('script').each(function() {
-                            JavaScriptString += $(this).html();
-                            $(this).remove();
-                        });
-
-                        $ElementToUpdate.fadeIn();
-                        Core.UI.InputFields.Activate($ElementToUpdate);
-                        try {
-                            /*eslint-disable no-eval */
-                            eval(JavaScriptString);
-                            /*eslint-enable no-eval */
+                            // We are out of the OTRS App scope, that's why an exception would not be caught. Therefor we handle the error manually.
+    //                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No content received.", 'CommunicationError'));
+                            $('#AJAXLoader').addClass('Hidden');
                         }
-                        catch (Event) {
-                            // do nothing here (code needed  to not have an empty block here)
-                            $.noop(Event);
-                        }
+                        else if ($ElementToUpdate && isJQueryObject($ElementToUpdate) && $ElementToUpdate.length) {
+                            $ElementToUpdate.find('script').each(function() {
+                                JavaScriptString += $(this).html();
+                                $(this).remove();
+                            });
 
-                        // Handle special server errors (Response = <div class="ServerError" data-message="Message"></div>)
-                        // Check if first element has class 'ServerError'
-                        if ($ElementToUpdate.children().first().hasClass('ServerError')) {
-                            ErrorMessage = $ElementToUpdate.children().first().data('message');
-
-                            // Add class ServerError to the process select element
-                            $('#ServiceID').addClass('ServerError');
-                            // Set a custom error message to the proccess select element
-                            $('#ProcessEntityIDServerError').children().first().text(ErrorMessage);
-                        }
-
-                        Core.Form.Validate.Init();
-
-                        // Register event for tree selection dialog
-                        Core.UI.TreeSelection.InitTreeSelection();
-
-                        // move help triggers into field rows for dynamic fields
-                        $('.Row > .FieldHelpContainer').each(function () {
-                            if (!$(this).next('label').find('.Marker').length) {
-                                $(this).prependTo($(this).next('label'));
+                            $ElementToUpdate.fadeIn();
+                            Core.UI.InputFields.Activate($ElementToUpdate);
+                            try {
+                                /*eslint-disable no-eval */
+                                eval(JavaScriptString);
+                                /*eslint-enable no-eval */
                             }
-                            else {
-                                $(this).insertAfter($(this).next('label').find('.Marker'));
+                            catch (Event) {
+                                // do nothing here (code needed  to not have an empty block here)
+                                $.noop(Event);
                             }
-                        });
 
-                        // Initially display dynamic fields with TreeMode = 1 correctly
-                        Core.UI.TreeSelection.InitDynamicFieldTreeViewRestore();
+                            // Handle special server errors (Response = <div class="ServerError" data-message="Message"></div>)
+                            // Check if first element has class 'ServerError'
+                            if ($ElementToUpdate.children().first().hasClass('ServerError')) {
+                                ErrorMessage = $ElementToUpdate.children().first().data('message');
 
-                        // trigger again a responsive event
-                        if (Core.App.Responsive.IsSmallerOrEqual(Core.App.Responsive.GetScreenSize(), 'ScreenL')) {
-                            Core.App.Publish('Event.App.Responsive.SmallerOrEqualScreenL');
+                                // Add class ServerError to the process select element
+                                $('#ServiceID').addClass('ServerError');
+                                // Set a custom error message to the proccess select element
+                                $('#ProcessEntityIDServerError').children().first().text(ErrorMessage);
+                            }
+
+                            Core.Form.Validate.Init();
+
+                            // Register event for tree selection dialog
+                            Core.UI.TreeSelection.InitTreeSelection();
+
+                            // move help triggers into field rows for dynamic fields
+                            $('.Row > .FieldHelpContainer').each(function () {
+                                if (!$(this).next('label').find('.Marker').length) {
+                                    $(this).prependTo($(this).next('label'));
+                                }
+                                else {
+                                    $(this).insertAfter($(this).next('label').find('.Marker'));
+                                }
+                            });
+
+                            // Initially display dynamic fields with TreeMode = 1 correctly
+                            Core.UI.TreeSelection.InitDynamicFieldTreeViewRestore();
+
+                            // trigger again a responsive event
+                            if (Core.App.Responsive.IsSmallerOrEqual(Core.App.Responsive.GetScreenSize(), 'ScreenL')) {
+                                Core.App.Publish('Event.App.Responsive.SmallerOrEqualScreenL');
+                            }
+
+                            $('#AJAXLoader').addClass('Hidden');
+                            $('#AJAXDialog').val('1');
+
+                            $(".AddDFS").each(function() { 
+                            
+                            
+                                if($(this).hasClass('DateSelection') || $(this).hasClass('Validate_MaxLength'))
+                                {
+                                    return true;
+                                }
+                            
+                                var formId = {};
+                                var id = $(this).attr('id');
+                            
+                                var formID ="";
+                                $("form").each(function(){
+                                    if($(this).attr("name") == "compose"){ 
+                                        formID = $(this).attr("id");
+                                    }
+                                });
+                            
+                                var $inputs = $('#'+formID +' :input');
+                            
+                               
+                                var ids = [];
+                            
+                                $inputs.each(function (index)
+                                {
+                                    
+                                    
+                                    if (typeof $(this).attr('id') != 'undefined' && typeof $(this).attr('name') != 'undefined' ) {
+                                        ids.push( $(this).attr('id'));
+                                    }
+                                });
+                                $('#'+id).bind('change', function (Event) {
+                                    Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id,ids );
+                                });
+                            
+                            
+                            });
                         }
+                        else {
 
-                        $('#AJAXLoader').addClass('Hidden');
-                        $('#AJAXDialog').val('1');
-
-						$(".AddDFS").each(function() { 
-						
-						
-						    if($(this).hasClass('DateSelection') || $(this).hasClass('Validate_MaxLength'))
-						    {
-						   		return true;
-						    }
-						
-						    var formId = {};
-						    var id = $(this).attr('id');
-						
-						    var formID ="";
-						    $("form").each(function(){
-						    	if($(this).attr("name") == "compose"){ 
-						    		formID = $(this).attr("id");
-						    	}
-						    });
-						
-						    var $inputs = $('#'+formID +' :input');
-						
-						   
-						    var ids = [];
-						
-						    $inputs.each(function (index)
-						    {
-							    
-						    	
-								if (typeof $(this).attr('id') != 'undefined' && typeof $(this).attr('name') != 'undefined' ) {
-							    	ids.push( $(this).attr('id'));
-						        }
-						    });
-						 	$('#'+id).bind('change', function (Event) {
-						        Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id,ids );
-						    });
-						
-						
-						});
-                    }
-                    else {
-
-                        // We are out of the OTRS App scope, that's why an exception would not be caught. Therefor we handle the error manually.
-//                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No such element id: " + $ElementToUpdate.attr('id') + " in page!", 'CommunicationError'));
-                        $('#AJAXLoader').addClass('Hidden');
-                    }
-                }, 'html');
-
+                            // We are out of the OTRS App scope, that's why an exception would not be caught. Therefor we handle the error manually.
+    //                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No such element id: " + $ElementToUpdate.attr('id') + " in page!", 'CommunicationError'));
+                            $('#AJAXLoader').addClass('Hidden');
+                        }
+                    },
+                'html');
             }
             else {
 				$('.AddDFS').each(function(){
