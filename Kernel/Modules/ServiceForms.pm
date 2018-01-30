@@ -30,6 +30,36 @@ sub new {
         return $Self;
     }
 
+    # Check if it's upload
+    # get upload cache object
+    my $UploadCacheObject = $Kernel::OM->Get('Kernel::System::Web::UploadCache');
+    my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
+    
+    # If is an action about attachments
+    my $IsUpload = 0;
+
+    # attachment delete
+    my @AttachmentIDs = map {
+        my ($ID) = $_ =~ m{ \A AttachmentDelete (\d+) \z }xms;
+        $ID ? $ID : ();
+    } $ParamObject->GetParamNames();
+
+    COUNT:
+    for my $Count ( reverse sort @AttachmentIDs ) {
+        my $Delete = $ParamObject->GetParam( Param => "AttachmentDelete$Count" );
+        next COUNT if !$Delete;
+        $IsUpload = 1;
+    }
+
+    # attachment upload
+    if ( $ParamObject->GetParam( Param => 'AttachmentUpload' ) ) {
+        $IsUpload                = 1;
+    }
+    # Para execução se não houver ServiceID
+    if($IsUpload){
+        return $Self;
+    }
+
     my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
     # Verifica se há o parametro ServiceID
     my $ServiceID  = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam( Param => 'ServiceID' ) || '';

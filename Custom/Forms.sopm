@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <otrs_package version="1.0">
     <Name>Forms</Name>
-    <Version>5.2.5</Version>
+    <Version>5.2.6</Version>
     <Framework>5.x.x</Framework>
     <Vendor>Complemento [Enterprise]</Vendor>
     <URL>http://www.complemento.net.br/</URL>
@@ -24,8 +24,7 @@
 
 
     <Filelist>
-	<File Permission="644" Location="Kernel/Config/Files/DynamicFieldByService.xml"></File>        
-	<File Permission="644" Location="Kernel/Config/Files/Service.Forms.xml"></File> 
+	<File Permission="644" Location="Kernel/Config/Files/DynamicFieldByService.xml"></File>
 	<File Permission="644" Location="Kernel/Modules/DynamicFieldByService.pm"></File> 
 	<File Permission="644" Location="Kernel/Modules/ServiceForms.pm"></File> 
 	<File Permission="644" Location="var/httpd/htdocs/js/Core.Agent.Admin.DynamicFieldByService.js"></File>
