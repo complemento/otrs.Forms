@@ -32,7 +32,6 @@ sub new {
 
     # Check if it's upload
     # get upload cache object
-    my $UploadCacheObject = $Kernel::OM->Get('Kernel::System::Web::UploadCache');
     my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
     
     # If is an action about attachments
@@ -57,7 +56,7 @@ sub new {
     }
     # Para execução se não houver ServiceID
     if($IsUpload){
-        return $Self;
+        #return $Self;
     }
 
     my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');

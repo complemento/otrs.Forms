@@ -39,10 +39,40 @@ sub new {
 sub Run {
     my ( $Self, %Param ) = @_;
 	my %Data = ();
+
     my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
-   
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+
+    # Check if it's upload
+    # get upload cache object
+    my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
+    
+    # If is an action about attachments
+    my $IsUpload = 0;
+    # attachment delete
+    my @AttachmentIDs = map {
+        my ($ID) = $_ =~ m{ \A AttachmentDelete (\d+) \z }xms;
+        $ID ? $ID : ();
+    } $ParamObject->GetParamNames();
+    COUNT:
+    for my $Count ( reverse sort @AttachmentIDs ) {
+        my $Delete = $ParamObject->GetParam( Param => "AttachmentDelete$Count" );
+        next COUNT if !$Delete;
+        $IsUpload = 1;
+    }
+    # attachment upload
+    if ( $ParamObject->GetParam( Param => 'AttachmentUpload' ) ) {
+        $IsUpload                = 1;
+    }
+    if($IsUpload){
+        $Kernel::OM->Get('Kernel::Output::HTML::Layout')->Block(
+            Name => 'IsUpload',
+            Data => {},
+        );
+    }
+
+
     # get template name
     my $userID = $Self->{UserID};
 	my %InformationCustomer =	 $Self->{CustomerUserObject}->CustomerUserDataGet(

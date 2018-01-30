@@ -35,7 +35,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 			setTimeout(function(){ $('#ServiceID').trigger("change"); }, 1);
 		}
         $('#ServiceID').bind('change', function () {
-			
+
 			var formID ="";
 			 $("form").each(function(){
 				if($(this).attr("name") == "compose"){ 
@@ -86,56 +86,56 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 					}
 					var res = Response.split(':$$:Add:$$:');
 					//LOOP QUE PEGA OS VALORES E OS NOMES 
-						Response = res[0];
-						var i;
-						arrayJSON = res[1].split('@%@%@');
-						objectJSON;
-						reloadFields = "";
-						var AgentFieldConfigInsert  = ".SpacingTop:first";
-						var CustomerFieldConfigInsert = "#BottomActionRow";
-						//var valObj = ["Dest","StateID","SLAID","TypeID"];
-						for( i=0; i < arrayJSON.length; i++){
-							objectJSON = $.parseJSON(arrayJSON[i]);
-							$.each( objectJSON, function( key, val ) {
-								  if(key && val){
-									if(key === "Message"){
-										window.CKEDITOR.instances['RichText'].setData(val);
-									    reloadFields += ""+key+",";
-									}else if(key === "AgentFieldConfig"){
-										AgentFieldConfigInsert = ""+val+"";
-									}
+                    var IsUpload = Core.Config.Get('LigeroFormsIsUpload');
+                    Core.Config.Set('LigeroFormsIsUpload');
+                    Response = res[0];
+                    var i;
+                    arrayJSON = res[1].split('@%@%@');
+                    objectJSON;
+                    reloadFields = "";
+                    var AgentFieldConfigInsert  = ".SpacingTop:first";
+                    var CustomerFieldConfigInsert = "#BottomActionRow";
+                    //var valObj = ["Dest","StateID","SLAID","TypeID"];
+                    for( i=0; i < arrayJSON.length; i++){
+                        objectJSON = $.parseJSON(arrayJSON[i]);
+                        $.each( objectJSON, function( key, val ) {
+                            if(key && val){
+                                    if(key === "Message"){
+                                        !IsUpload && window.CKEDITOR.instances['RichText'].setData(val);
+                                        reloadFields += ""+key+",";
+                                    }else if(key === "AgentFieldConfig"){
+                                        AgentFieldConfigInsert = ""+val+"";
+                                    }
+                                    else if($('#'+key).size() > 0){
+                                        reloadFields += ""+key+",";
+                                        !IsUpload && $('#'+key).val(val);
+                                        Core.UI.InputFields.Deactivate($('#'+key));
+                                        Core.UI.InputFields.Activate($('#'+key));
+                                    }
+                                    if(key === "CustomerFieldConfig"){
+                                        CustomerFieldConfigInsert =  ""+val+"";
+                                    }	
+                            }
 
-									else if($('#'+key).size() > 0){
-										reloadFields += ""+key+",";
-										$('#'+key).val(val);
-										Core.UI.InputFields.Deactivate($('#'+key));
-										Core.UI.InputFields.Activate($('#'+key));
-
-									}
-									if(key === "CustomerFieldConfig"){
-										CustomerFieldConfigInsert =  ""+val+"";
-									}	
-								  }	
-
-  							});
-						}
-						reloadFields = reloadFields.substring(0,reloadFields.length - 1);
-						//Core.AJAX.FormUpdate($('#'+formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
-						var FieldConfigInsert = "";
-						if(formID === "NewCustomerTicket"){
-							FieldConfigInsert = CustomerFieldConfigInsert;
-						}else{
-							 FieldConfigInsert =  AgentFieldConfigInsert;
-						} 	
-					
-        	           	var $ElementToUpdate = $(Response).insertBefore(FieldConfigInsert),
-        	            JavaScriptString = '',
-        	            ErrorMessage;
+                        });
+                    }
+                    reloadFields = reloadFields.substring(0,reloadFields.length - 1);
+                    //Core.AJAX.FormUpdate($('#'+formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
+                    var FieldConfigInsert = "";
+                    if(formID === "NewCustomerTicket"){
+                        FieldConfigInsert = CustomerFieldConfigInsert;
+                    }else{
+                         FieldConfigInsert =  AgentFieldConfigInsert;
+                    } 	
+                
+                    var $ElementToUpdate = $(Response).insertBefore(FieldConfigInsert),
+                    JavaScriptString = '',
+                    ErrorMessage;
 
 
 ////////////////////////////////////////////////////////
-			Core.UI.InputFields.Deactivate();
-			Core.UI.InputFields.Activate();
+                    Core.UI.InputFields.Deactivate();
+                    Core.UI.InputFields.Activate();
 //////////////////////////////////////////////////
                     if (!Response) {
 

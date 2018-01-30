@@ -1,5 +1,8 @@
 [% WRAPPER JSOnDocumentComplete %]
 <script type="text/javascript">//<![CDATA[
+[% RenderBlockStart("IsUpload") %]
+    Core.Config.Set('LigeroFormsIsUpload', '1');
+[% RenderBlockEnd(IsUpload) %]
     Core.Agent.DynamicFieldByService.Init();
 //]]></script>
 [% END %]
