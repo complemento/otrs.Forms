@@ -129,6 +129,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                         } 	
                         
                         var PreviousValues = {};
+                        var Checkeds = {};
                         
                         if(IsUpload){
                             // Get form values previously filled and remove default fields
@@ -140,6 +141,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                                         $($that).parent().parent().empty();
                                 });
                             });
+                            // Get form values previously checked checkbox
+                            $('input:checkbox',$(Response)).each(function(){
+                                Checkeds[$(this).attr('id')] = $("#"+$(this).attr('id')).attr('checked');
+                            });
                             
                         }
                         var $ElementToUpdate = $(Response).insertBefore(FieldConfigInsert),
@@ -149,6 +154,9 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                         // Set Previous values if any
                         $.each(PreviousValues, function(index, value) {
                             $('#'+index).val(value);
+                        }); 
+                        $.each(Checkeds, function(index, value) {
+                            $('#'+index).attr('checked',value);
                         }); 
 
 ////////////////////////////////////////////////////////
