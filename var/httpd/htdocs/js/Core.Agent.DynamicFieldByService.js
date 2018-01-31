@@ -27,8 +27,17 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
      *      This function initializes the special module functions.
      */
     TargetNS.Init = function () {
+        var subscribed = {};
 	    var arrayJSON;
 		var objectJSON;
+
+        Core.App.Subscribe('Event.AJAX.FormUpdate.Callback', function(Data) {
+            $('.DynamicFieldWithTreeView').each(function() {
+                $(this).removeClass('TreeViewRestored');
+
+            });
+            Core.UI.TreeSelection.InitDynamicFieldTreeViewRestore();
+        });
 
 		var reloadFields = "";
 		if($("[name=LinkTicketID]").size() > 0 && $("[name=LinkTicketID]").val() != "" || $("[name=Action]").val() == "CustomerTicketMessage" && $("#ServiceID").val() != ""){
@@ -225,8 +234,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                             $('#AJAXDialog').val('1');
 
                             $(".AddDFS").each(function() { 
-                            
-                            
                                 if($(this).hasClass('DateSelection') || $(this).hasClass('Validate_MaxLength'))
                                 {
                                     return true;
@@ -258,7 +265,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                                 $('#'+id).bind('change', function (Event) {
                                     Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id,ids );
                                 });
-                            
                             
                             });
                         }
