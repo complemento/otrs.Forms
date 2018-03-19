@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <otrs_package version="1.0">
     <Name>Forms</Name>
-    <Version>5.2.6</Version>
+    <Version>5.2.7</Version>
     <Framework>5.x.x</Framework>
     <Vendor>Complemento [Enterprise]</Vendor>
     <URL>http://www.complemento.net.br/</URL>
@@ -50,7 +50,7 @@
         <Column Name="change_time" 	Required="true" Type="DATE"></Column>
         <Column Name="change_by" 	Required="true" Type="INTEGER"></Column>
      	<Column Name="subject"   	Required="false" Size="255" Type="VARCHAR"></Column>
-     	<Column Name="body"			Required="false" Type="TEXT"> </Column>	
+     	<Column Name="body"			Required="false" Type="VARCHAR" Size="20000"> </Column>	
    		<Column Name="type_id" 		Required="false" Size="3" Type="VARCHAR"></Column>
      	<Column Name="workflow_id" 	Required="true" Type="INTEGER"></Column>
      	<Column Name="frontend" 	Required="true" Size="255" Type="VARCHAR"></Column>
@@ -77,7 +77,7 @@
         <Column Name="change_time" 	Required="true" Type="DATE"></Column>
         <Column Name="change_by" 	Required="true" Type="INTEGER"></Column>
      	<Column Name="subject"   	Required="false" Size="255" Type="VARCHAR"></Column>
-     	<Column Name="body"			Required="false" Type="TEXT"> </Column>	
+        <Column Name="body"			Required="false" Type="VARCHAR" Size="20000"> </Column>	
    		<Column Name="type_id" 		Required="false" Size="3" Type="VARCHAR"></Column>
      	<Column Name="workflow_id" 	Required="true" Type="INTEGER"></Column>
      	<Column Name="frontend" 	Required="true" Size="255" Type="VARCHAR"></Column>
