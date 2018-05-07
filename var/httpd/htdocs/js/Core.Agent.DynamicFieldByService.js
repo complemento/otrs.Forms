@@ -110,7 +110,12 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                             $.each( objectJSON, function( key, val ) {
                                 if(key && val){
                                         if(key === "Message"){
-                                            !IsUpload && window.CKEDITOR.instances['RichText'].setData(val);
+                                            if (!IsUpload){
+                                                window.CKEDITOR.instances['RichText'].on('instanceReady', function() { 
+                                                    setTimeout(function(){ window.CKEDITOR.instances['RichText'].setData(val); }, 400);
+                                                });
+                                                setTimeout(function(){ window.CKEDITOR.instances['RichText'].setData(val); }, 400);
+                                            }
                                             reloadFields += ""+key+",";
                                         }else if(key === "AgentFieldConfig"){
                                             AgentFieldConfigInsert = ""+val+"";
