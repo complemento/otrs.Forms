@@ -31,7 +31,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		var objectJSON;
 
 		var reloadFields = "";
-		if($("[name=LinkTicketID]").size() > 0 && $("[name=LinkTicketID]").val() != "" || $("[name=Action]").val() == "CustomerTicketMessage" && $("#ServiceID").val() != ""){
+		if($('[name=LinkTicketID]').length > 0 && $('[name=LinkTicketID]').val() != "" || $("[name=Action]").val() == "CustomerTicketMessage" && $("#ServiceID").val() != ""){
 			setTimeout(function(){ $('#ServiceID').trigger("change"); }, 1);
 		}
         $('#ServiceID').bind('change', function () {
@@ -105,7 +105,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 										AgentFieldConfigInsert = ""+val+"";
 									}
 
-									else if($('#'+key).size() > 0){
+									else if($('#'+key).length > 0){
 										reloadFields += ""+key+",";
 										$('#'+key).val(val);
 										Core.UI.InputFields.Deactivate($('#'+key));
@@ -223,17 +223,24 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						
 						    $inputs.each(function (index)
 						    {
-							    
-						    	
-								if (typeof $(this).attr('id') != 'undefined' && typeof $(this).attr('name') != 'undefined' ) {
+								if (typeof $(this).attr('id') != 'undefined' 
+								 && typeof $(this).attr('name') != 'undefined' ) {
 							    	ids.push( $(this).attr('id'));
 						        }
-						    });
+							});
+							var index = ids.indexOf('FileUpload');
+							if (index !== -1) ids.splice(index, 1);
+
+
 						 	$('#'+id).bind('change', function (Event) {
 						        Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id,ids );
 						    });
-						
-						
+							Core.App.Subscribe('Event.AJAX.FormUpdate.Callback', function(Data) {
+								var FieldName = id;
+								if (Data[FieldName] && $('#' + FieldName).hasClass('DynamicFieldWithTreeView')) {
+									Core.UI.TreeSelection.RestoreDynamicFieldTreeView($('#' + FieldName), Data[FieldName], '' , 1);
+								}
+							});
 						});
                     }
                     else {
@@ -258,7 +265,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 					if(arrayFieldsClean[i] === "Message"){
 						window.CKEDITOR.instances['RichText'].setData('');
 					}
-					else if($('#'+ arrayFieldsClean[i]).size() > 0){
+					else if($('#'+ arrayFieldsClean[i]).length > 0){
 						 $('#'+arrayFieldsClean[i]).val('');	
 					}
 

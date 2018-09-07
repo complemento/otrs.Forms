@@ -11,6 +11,8 @@
 
 package Kernel::System::DynamicFieldByService;
 
+use Data::Dumper;
+
 use strict;
 use warnings;
 use utf8;
@@ -484,16 +486,25 @@ sub GetDynamicFieldByService {
 sub DynamicFieldByServiceList {
     my ( $Self, %Param ) = @_;
 
-    if ( !defined $Param{Valid} ) {
-        $Param{Valid} = 1;
-    }
+    # if ( !defined $Param{Valid} ) {
+    #     $Param{Valid} = 1;
+    # }
 
     # return data
-    return $Self->{DBObject}->GetTableData(
-        Table => 'dfs',
-        What  => 'id, name',
-        Valid => $Param{Valid},
+    my $Table = $Self->{DBObject}->SelectAll(
+        SQL => 'select * from dfs'
     );
+
+	return if ! scalar @$Table;
+
+	my %Result;
+	for my $Row (@$Table){
+		$Result{$Row->[0]} = {
+			"Name" => $Row->[1]
+		}
+	}
+
+	return %Result;
 }
 
 
