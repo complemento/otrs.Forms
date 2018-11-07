@@ -16,6 +16,7 @@ use strict;
 use warnings;
 use Encode qw();
 
+use Data::Dumper;
 
 use Kernel::System::VariableCheck qw(:all);
 use JSON;
@@ -125,6 +126,212 @@ sub Run {
 		);
 
 	}
+
+    # HideAndShowDynamicFields
+    # Aqui iremos elaborar o html que deve ser exibido na tela de acordo com ACLs
+	# elsif ( $Self->{Subaction} eq 'HideAndShowDynamicFields' && $ServiceDynamicID && $InterfaceName ) {
+	elsif ( $Self->{Subaction} eq 'HideAndShowDynamicFields' && $InterfaceName ) {
+        my $ActivityDialogHTML;
+        my $Action = $Self->{Action}||'';
+        my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
+        # # Verifica se há o parametro ServiceID
+        my $ServiceID  = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam( Param => 'ServiceID' ) || '';
+        my $Subaction = $Self->{Subaction} || '';	    
+        
+        # Para execução se não houver ServiceID
+        # if($ServiceID eq '' or $Subaction eq ''){
+        #     return $Self;
+        # }
+        my $DynamicFieldsByService = $DfByServiceObject->GetDynamicFieldByService(ServiceID => $ServiceID);
+        my %HashDosCampos;
+
+        if ($DynamicFieldsByService->{Config}){
+            DIALOGFIELD:
+                for my $CurrentField ( @{ $DynamicFieldsByService->{Config}{FieldOrder} } ) {
+                    my %FieldData = %{ $DynamicFieldsByService->{Config}{Fields}{$CurrentField} };
+
+                    next DIALOGFIELD if !$FieldData{Display};
+        
+                    # render DynamicFields
+                    if ( $CurrentField =~ m{^DynamicField_(.*)}xms ) {
+                        my $DynamicFieldName = $1;
+                        $HashDosCampos{$DynamicFieldName} = $FieldData{Display}; 	
+                    }
+            }
+        }
+        # return $Self if(!%HashDosCampos);
+        my $ConfigObject = $Kernel::OM->Get('Kernel::Config');   
+        my $HashOld = $ConfigObject->Get("Ticket::Frontend::$Action"); 
+        foreach my $Keys (keys %{$HashOld->{DynamicField}}){
+            $HashDosCampos{$Keys} = $HashOld->{DynamicField}{$Keys};
+        }
+        my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+        # Get all DynamicFields from Ticket And Article
+        my $DynamicFieldObject = $Kernel::OM->Get('Kernel::System::DynamicField');
+        my $DynamicFields = $DynamicFieldObject->DynamicFieldList(
+            Valid => 1,             # optional, defaults to 1
+            ObjectType => ['Ticket', 'Article'],
+            ResultType => 'HASH'
+        );
+        my $DynamicFieldBackendObject = $Kernel::OM->Get('Kernel::System::DynamicField::Backend');
+        
+        # Aqui ainda tem que desenvolver, pega os parametros possiveis e passar para a ACL
+        my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
+        # get params
+        my %GetParam;
+        for my $Key (qw(
+            NewStateID NewPriorityID TimeUnits IsVisibleForCustomer Title Body Subject NewQueueID
+            Year Month Day Hour Minute NewOwnerID NewResponsibleID TypeID ServiceID SLAID
+            Expand ReplyToArticle StandardTemplateID CreateArticle FormDraftID Title
+            )
+            )
+        {
+            $GetParam{$Key} = $ParamObject->GetParam( Param => $Key );
+            delete $GetParam{$Key} if !$GetParam{$Key};
+        }
+
+        # ACL compatibility translation
+        my %ACLCompatGetParam = (
+            StateID       => $GetParam{NewStateID},
+            PriorityID    => $GetParam{NewPriorityID},
+            QueueID       => $GetParam{NewQueueID},
+            OwnerID       => $GetParam{NewOwnerID},
+            ResponsibleID => $GetParam{NewResponsibleID},
+        );
+
+        # get dynamic field values form http request
+        my %DynamicFieldValues;
+
+        # # get the dynamic fields for this screen
+        my $DynamicField = $Kernel::OM->Get('Kernel::System::DynamicField')->DynamicFieldListGet(
+            Valid       => 1,
+            ObjectType  => [ 'Ticket', 'Article' ],
+        );
+
+        # cycle trough the activated Dynamic Fields for this screen
+        DYNAMICFIELD:
+        for my $DynamicFieldConfig ( @{$DynamicField} ) {
+            next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
+
+            # extract the dynamic field value from the web request
+            $DynamicFieldValues{ $DynamicFieldConfig->{Name} } = $DynamicFieldBackendObject->EditFieldValueGet(
+                DynamicFieldConfig => $DynamicFieldConfig,
+                ParamObject        => $ParamObject,
+                LayoutObject       => $LayoutObject,
+            );
+        }
+
+        # # convert dynamic field values into a structure for ACLs
+        my %DynamicFieldACLParameters;
+        DYNAMICFIELD:
+        for my $DynamicFieldItem ( sort keys %DynamicFieldValues ) {
+            next DYNAMICFIELD if !$DynamicFieldItem;
+            next DYNAMICFIELD if !defined $DynamicFieldValues{$DynamicFieldItem};
+
+            $DynamicFieldACLParameters{ 'DynamicField_' . $DynamicFieldItem } = $DynamicFieldValues{$DynamicFieldItem};
+        }
+        $GetParam{DynamicField} = \%DynamicFieldACLParameters;
+
+        my %PossibleActions;
+
+        my $Counter=0;
+        for my $DF (keys %$DynamicFields){
+            $Counter++;
+            $PossibleActions{$Counter} = "DF_".$DynamicFields->{$DF};
+            $Counter++;
+            $PossibleActions{$Counter} = "DF_".$DynamicFields->{$DF}."_Required";
+        }
+
+        my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
+
+        my $ACL = $TicketObject->TicketAcl(
+            Data          => \%PossibleActions,
+            %GetParam,
+            ReturnType    => 'Action',
+            ReturnSubType => '-',
+            UserID        => $Self->{UserID},
+        );
+        my %AclAction = %PossibleActions;
+        if ($ACL) {
+            %AclAction = $TicketObject->TicketAclActionData();
+            for my $CurrentField ( keys %AclAction ) {
+                if ( $AclAction{$CurrentField} =~ m{^DF_(.*)_Required}xms ) {
+                    my $DynamicFieldName = $1;
+                    $HashDosCampos{$DynamicFieldName} = '2';
+                } elsif ( $AclAction{$CurrentField} =~ m{^DF_(.*)}xms ) {
+                    my $DynamicFieldName = $1;
+                    $HashDosCampos{$DynamicFieldName} = '1';
+                }
+            }
+        }
+
+        $Kernel::OM->Get('Kernel::System::Log')->Log(
+            Priority => 'error',
+            Message  => "UUUUUUUUUUUUUUUUUUUUUUUU ".Dumper(%GetParam),
+        );
+        $Kernel::OM->Get('Kernel::System::Log')->Log(
+            Priority => 'error',
+            Message  => "aaaaaaaaaaaaaaaaaaaa ".Dumper(%HashDosCampos),
+        );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        $ActivityDialogHTML = 'aeeeeeeeeeeeeeeee';
+		# my $GetParam = $Self->_GetParam(
+		# 	ServiceDynamicID => $ServiceDynamicID,
+		# 	InterfaceName   => $InterfaceName, 
+		# );
+
+		# my $ActivityDialogHTML = $Self->_OutputActivityDialog(
+	 	#    	%Param,
+	   	#  	ServiceDynamicID => $ServiceDynamicID,
+		# 	InterfaceName	=> $InterfaceName,
+	    # 		GetParam        => $GetParam,
+		# );
+		# if(!$ActivityDialogHTML){
+		# 	$ActivityDialogHTML = 0;
+		# }
+		return $LayoutObject->Attachment(
+	   		ContentType => 'text/html; charset=' . $LayoutObject->{Charset},
+	   		 Content     => $ActivityDialogHTML,
+	  		  Type        => 'inline',
+	   		 NoCache     => 1,
+		);
+
+	}
+
+
+
+
+
+
+
 
 	# ------------------------------------------------------------ #
 	# add
