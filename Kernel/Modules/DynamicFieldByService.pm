@@ -265,58 +265,54 @@ sub Run {
             }
         }
 
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => "UUUUUUUUUUUUUUUUUUUUUUUU ".Dumper(%GetParam),
-        );
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => "aaaaaaaaaaaaaaaaaaaa ".Dumper(%HashDosCampos),
-        );
+        # $Kernel::OM->Get('Kernel::System::Log')->Log(
+        #     Priority => 'error',
+        #     Message  => "UUUUUUUUUUUUUUUUUUUUUUUU ".Dumper(%GetParam),
+        # );
+        # $Kernel::OM->Get('Kernel::System::Log')->Log(
+        #     Priority => 'error',
+        #     Message  => "aaaaaaaaaaaaaaaaaaaa 222222222222222".Dumper(%HashDosCampos),
+        # );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        $ActivityDialogHTML = 'aeeeeeeeeeeeeeeee';
 		# my $GetParam = $Self->_GetParam(
 		# 	ServiceDynamicID => $ServiceDynamicID,
 		# 	InterfaceName   => $InterfaceName, 
 		# );
 
-		# my $ActivityDialogHTML = $Self->_OutputActivityDialog(
-	 	#    	%Param,
-	   	#  	ServiceDynamicID => $ServiceDynamicID,
-		# 	InterfaceName	=> $InterfaceName,
-	    # 		GetParam        => $GetParam,
-		# );
-		# if(!$ActivityDialogHTML){
-		# 	$ActivityDialogHTML = 0;
-		# }
+        #  Exemplo do objeto que temos que construir
+        #   'Config' => {
+        #                 'FieldOrder' => [
+        #                                   'DynamicField_Agua',
+        #                                   'DynamicField_TipoPeixe'
+        #                                 ],
+        #                 'Fields' => {
+        #                               'DynamicField_TipoPeixe' => {
+        #                                                             'Display' => '1',
+        #                                                             'DescriptionShort' => '',
+        #                                                             'DescriptionLong' => '',
+        #                                                             'DefaultValue' => ''
+        #                                                           },
+        #                               'DynamicField_Agua' => {
+        #                                                        'Display' => '2',
+        #                                                        'DescriptionShort' => '',
+        #                                                        'DescriptionLong' => '',
+        #                                                        'DefaultValue' => ''
+        #                                                      }
+        #                             }
+        #               }
+
+
+		$ActivityDialogHTML = $Self->_OutputShowHideDynamicFields(
+	 	   	%Param,
+	   	 	# ServiceDynamicID => $ServiceDynamicID,
+			InterfaceName	 => $InterfaceName,
+	    		GetParam     => \%GetParam,
+         DynamicFieldsToShow => \%HashDosCampos,
+		);
+
+		if(!$ActivityDialogHTML){
+			$ActivityDialogHTML = 0;
+		}
 		return $LayoutObject->Attachment(
 	   		ContentType => 'text/html; charset=' . $LayoutObject->{Charset},
 	   		 Content     => $ActivityDialogHTML,
@@ -1484,6 +1480,7 @@ sub _Overview {
 
     return 1;
 }
+
 sub _OutputActivityDialog {
 	my ( $Self, %Param ) = @_;
 	my $TicketID               = $Param{GetParam}{TicketID};
@@ -1494,8 +1491,6 @@ sub _OutputActivityDialog {
 	my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
 	# Check needed parameters:
 
-	#SUBTITUIR PELO SERVICEID  
-	my $ActivityActivityDialog;
 	my %Ticket;
 	my %Error         = ();
 	my %ErrorMessages = ();
@@ -1511,64 +1506,34 @@ sub _OutputActivityDialog {
 	my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 	my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
-	$ActivityActivityDialog =  $DfByServiceObject->GetDynamicFieldByService(ServiceID => $Param{ServiceDynamicID});
-	
 	my $ActivityDialog = $DfByServiceObject->GetDynamicFieldByServiceAndInterface(ServiceID => $Param{ServiceDynamicID},  InterfaceName   => $Param{InterfaceName} );
 	if(!$ActivityDialog->{ID}){
 		return;
 	}
 
 
-
-#	if ( !%Ticket && $Self->{IsProcessEnroll} ) {
- #       	%Ticket = $TicketObject->TicketGet(
-#	            TicketID      => $TicketID,
-#	            UserID        => $Self->{UserID},
-#	            DynamicFields => 1,
-#	        );
-#	}
-
 	my $Output='';
     my %RenderedFields = ();
-    $Output = "";
+
     # get the list of fields where the AJAX loader icon should appear on AJAX updates triggered
     # by ActivityDialog fields
     my $AJAXUpdatableFields;
     if(ref ($ActivityDialog->{Config}) eq 'HASH'){
-            $AJAXUpdatableFields = $Self->_GetAJAXUpdatableFields(
-                ActivityDialogFields => $ActivityDialog->{Config}{Fields},
-            );
-#    }
-
-    #    # Loop through ActivityDialogFields and render their output
+        $AJAXUpdatableFields = $Self->_GetAJAXUpdatableFields(
+            ActivityDialogFields => $ActivityDialog->{Config}{Fields},
+        );
+        # Loop through ActivityDialogFields and render their output
 	    DIALOGFIELD:
 	    for my $CurrentField ( @{ $ActivityDialog->{Config}{FieldOrder} } ) {
 
-
-		    if ( !IsHashRefWithData( $ActivityDialog->{Config}{Fields}{$CurrentField} ) ) {
-			    my $Message = "Can't get data for Field '$CurrentField' of ActivityDialog"
-				    . " '$ActivityDialog->{ActivityDialog}'!";
-
-			    # does not show header and footer again
-			    if ( $Self->{IsMainWindow} ) {
-				    return $LayoutObject->Error(
-					    Message => $Message,
-				    );
-			    }
-
-			    $LayoutObject->FatalError(
-				    Message => $Message,
-			    );
-	      	 }
-
-		     my %FieldData = %{ $ActivityDialog->{Config}{Fields}{$CurrentField} };
+            my %FieldData = %{ $ActivityDialog->{Config}{Fields}{$CurrentField} };
 
 		    # We render just visible ActivityDialogFields
-            	next DIALOGFIELD if !$FieldData{Display};
+            next DIALOGFIELD if !$FieldData{Display};
 
 		    $Self->{FormID} = "NewPhoneTicket";
-           		 # render DynamicFields
-		
+
+            # render DynamicFields
             if ( $CurrentField =~ m{^DynamicField_(.*)}xms ) {
 
              	my $DynamicFieldName = $1;
@@ -1744,24 +1709,10 @@ sub _OutputActivityDialog {
 	                 AJAXUpdatableFields => $AJAXUpdatableFields,
 	             );
 
-    #	         if ( !$Response->{Success} ) {
 
-	                 # does not show header and footer again
-    #	             if ( $Self->{IsMainWindow} ) {
-    #	                 return $LayoutObject->Error(
-    #	                     Message => $Response->{Message},
-    #	                 );
-    #	             }
-
-    #	             $LayoutObject->FatalError(
-    #	                 Message => $Response->{Message},
-    #	             );
-    #	         }
-
-    #	         $Output .= $Response->{HTML};
 
 			    $AjaxResponseJson .= $Response;
-    #	         $RenderedFields{ $Self->{NameToID}->{$CurrentField} } = 1;
+
 	    }
 
 	         # render responsible
@@ -1806,10 +1757,10 @@ sub _OutputActivityDialog {
 
 
 
-    #	         $Output .= $Response->{HTML};
+
 
 			    $AjaxResponseJson .= $Response;
-    #	         $RenderedFields{ $Self->{NameToID}->{$CurrentField} } = 1;
+
 	         }
 
 	         elsif ( $CurrentField eq 'PendingTime' )
@@ -1963,7 +1914,7 @@ sub _OutputActivityDialog {
 	             $RenderedFields{ $Self->{NameToID}->{$CurrentField} } = 1;
 	         }
 	    } #### fim do order
-	} ## fim do if hash
+	}
 
 	my $FooterCSSClass = 'Footer';
 
@@ -2302,25 +2253,6 @@ sub _RenderDynamicField {
         Name => $Param{ActivityDialogField}->{LayoutBlock} || 'rw:DynamicField',
         Data => \%Data,
     );
-
-    if ( $Param{DescriptionShort} ) {
-        $LayoutObject->Block(
-            Name => $Param{ActivityDialogField}->{LayoutBlock}
-                || 'rw:DynamicField:DescriptionShort',
-            Data => {
-                DescriptionShort => $Param{DescriptionShort},
-            },
-        );
-    }
-
-    if ( $Param{DescriptionLong} ) {
-  #      $LayoutObject->Block(
-#            Name => 'rw:DynamicField:DescriptionLong',
- #           Data => {
-  #              DescriptionLong => $Param{DescriptionLong},
-  #          },
-  #      );
-    }
 
     return {
         Success => 1,
@@ -4925,6 +4857,72 @@ sub _GetAJAXUpdatableFields {
     }
 
     return \@UpdatableFields;
+}
+
+
+
+# Complemento, render new Dynamic Fields for this screen
+sub _OutputShowHideDynamicFields {
+	my ( $Self, %Param ) = @_;
+
+	my $DynamicFieldsToShow    = $Param{GetParam}{DynamicFieldsToShow} || {};
+
+$Kernel::OM->Get('Kernel::System::Log')->Log(
+    Priority => 'error',
+    Message  => "aaaaaaaaaaaaaaaaaaaa ".Dumper(%Param),
+);
+
+	my $AjaxResponseJson='';
+	# get needed object
+	my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
+	my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+	my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+
+	my %Error         = ();
+	my %ErrorMessages = ();
+
+	# If we had Errors, we got an Errorhash
+	%Error         = %{ $Param{Error} }         if ( IsHashRefWithData( $Param{Error} ) );
+	%ErrorMessages = %{ $Param{ErrorMessages} } if ( IsHashRefWithData( $Param{ErrorMessages} ) );
+
+
+	my $Output='';
+    my %RenderedFields = ();
+
+	# reload parent window
+	if ( $Param{ParentReload} ) {
+		$LayoutObject->Block(
+		    	Name => 'ParentReload',
+		);
+	}
+
+	my $JsonSubject = '';
+	my $JsonType = '';
+	my $JsonMessage = '';
+   	my %JsonReturn;
+	my $AgentJsonFieldConfig;
+	my $CustomerJsonFieldConfig;	
+	my $JSONObject = $Kernel::OM->Get('Kernel::System::JSON');
+
+	if($Kernel::OM->Get('Kernel::Config')->Get('AgentDynamicFieldByService::NameBeforeField')){
+		%JsonReturn = ('AgentFieldConfig' => $Kernel::OM->Get('Kernel::Config')->Get('AgentDynamicFieldByService::NameBeforeField') );	
+		$AgentJsonFieldConfig = "@%@%@".encode_json \%JsonReturn if(%JsonReturn);
+
+	}	
+	if($Kernel::OM->Get('Kernel::Config')->Get('CustomerDynamicFieldByService::NameBeforeField')){
+		%JsonReturn = ('CustomerFieldConfig' => $Kernel::OM->Get('Kernel::Config')->Get('CustomerDynamicFieldByService::NameBeforeField') );	
+		$CustomerJsonFieldConfig = "@%@%@".encode_json \%JsonReturn if(%JsonReturn);
+
+	}	
+	$Output .= $LayoutObject->Output(
+	     Template => '[% Data.JSON %]',
+	     Data         => {
+							JSON => ':$$:Add:$$:{"1":"1"} ' . $JsonType . " " . $JsonSubject . " " . $JsonMessage . " " . $AgentJsonFieldConfig. " " . $CustomerJsonFieldConfig ." ".  $AjaxResponseJson,
+
+						},
+	 );
+
+	return $Output;
 }
 
 1
