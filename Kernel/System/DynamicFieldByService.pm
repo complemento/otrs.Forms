@@ -355,9 +355,10 @@ sub GetDynamicFieldByServiceAndInterface {
 	
    	 my $YAMLObject = $Kernel::OM->Get('Kernel::System::YAML');
 	 while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
-	 	my %Type = $Kernel::OM->Get('Kernel::System::Type')->TypeGet(
+	 	my %Type;
+		%Type = $Kernel::OM->Get('Kernel::System::Type')->TypeGet(
         		ID => $Data[10],
-	 	);
+	 	) if $Data[10];
 	
 		if( $Data[12] ne 'BothInterfaces'){
 			if($Param{Interface} ne $Data[12]){
@@ -436,38 +437,40 @@ sub GetDynamicFieldByService {
 			WHERE dfs.id = ?',
         	Bind => [ \$FormID ],
    	);
-    	my %Data;
-	
-    	my $YAMLObject = $Kernel::OM->Get('Kernel::System::YAML');
+	my %Data;
+
+	my $YAMLObject = $Kernel::OM->Get('Kernel::System::YAML');
+
+	my %Type;
 	while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
-		    my %Type = $Kernel::OM->Get('Kernel::System::Type')->TypeGet(
-        	    ID => $Data[10],
-	);
+		%Type = $Kernel::OM->Get('Kernel::System::Type')->TypeGet(
+			ID => $Data[10],
+		) if $Data[10];
 
 		my $Config = '';
 		if ($Data[13] ){
-    		$Config = $YAMLObject->Load( Data => $Data[13] );
+			$Config = $YAMLObject->Load( Data => $Data[13] );
 		}
 
-        %Data = (
-            ID            => $Data[14],
-            Name          => $Data[0],
-		    Comments 	  => $Data[1],
-		    ValidID	  	  => $Data[2],
-		    ContetType	  => $Data[3], 
-		    CreateTime	  => $Data[4], 
-	   	    CreateBy	  => $Data[5], 
-		    ChangeTime    => $Data[6], 
-		    ChangeBy   	  => $Data[7], 
-		    Subject 	  => $Data[8], 
-		    Body		  => $Data[9], 
-		    Type	 	  => $Type{Name},
-		    TypeID        =>  $Data[10],
-		    WorkflowId	  => $Data[11], 
-                    Frontend	  => $Data[12], 
-		    ServiceID	  => $Param{ServiceID}, 
+		%Data = (
+			ID            => $Data[14],
+			Name          => $Data[0],
+			Comments 	  => $Data[1],
+			ValidID	  	  => $Data[2],
+			ContetType	  => $Data[3], 
+			CreateTime	  => $Data[4], 
+			CreateBy	  => $Data[5], 
+			ChangeTime    => $Data[6], 
+			ChangeBy   	  => $Data[7], 
+			Subject 	  => $Data[8], 
+			Body		  => $Data[9], 
+			Type	 	  => $Type{Name},
+			TypeID        =>  $Data[10],
+			WorkflowId	  => $Data[11], 
+					Frontend	  => $Data[12], 
+			ServiceID	  => $Param{ServiceID}, 
 			Config	      => $Config,
-        );
+		);
     }
 
 #    return if !$Self->{DBObject}->Prepare(

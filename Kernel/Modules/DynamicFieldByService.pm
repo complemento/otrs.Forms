@@ -143,7 +143,7 @@ sub Run {
         #     return $Self;
         # }
         my $DynamicFieldsByService = $DfByServiceObject->GetDynamicFieldByService(ServiceID => $ServiceID);
-        my %HashDosCampos;
+        my %DynamicFieldsHash;
 
         if ($DynamicFieldsByService->{Config}){
             DIALOGFIELD:
@@ -155,15 +155,15 @@ sub Run {
                     # render DynamicFields
                     if ( $CurrentField =~ m{^DynamicField_(.*)}xms ) {
                         my $DynamicFieldName = $1;
-                        $HashDosCampos{$DynamicFieldName} = $FieldData{Display}; 	
+                        $DynamicFieldsHash{$DynamicFieldName} = $FieldData{Display}; 	
                     }
             }
         }
-        # return $Self if(!%HashDosCampos);
+        # return $Self if(!%DynamicFieldsHash);
         my $ConfigObject = $Kernel::OM->Get('Kernel::Config');   
         my $HashOld = $ConfigObject->Get("Ticket::Frontend::$Action"); 
         foreach my $Keys (keys %{$HashOld->{DynamicField}}){
-            $HashDosCampos{$Keys} = $HashOld->{DynamicField}{$Keys};
+            $DynamicFieldsHash{$Keys} = $HashOld->{DynamicField}{$Keys};
         }
         my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
         # Get all DynamicFields from Ticket And Article
@@ -244,12 +244,19 @@ sub Run {
 
         my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
+        my %UserID;
+        if($Self->{SessionSource} eq 'CustomerInterface'){
+            $UserID{CustomerUserID} = $Self->{UserID};
+        } else {
+            $UserID{UserID} = $Self->{UserID};
+        }
+
         my $ACL = $TicketObject->TicketAcl(
             Data          => \%PossibleActions,
             %GetParam,
             ReturnType    => 'Action',
             ReturnSubType => '-',
-            UserID        => $Self->{UserID},
+            %UserID,
         );
         my %AclAction = %PossibleActions;
         if ($ACL) {
@@ -257,58 +264,38 @@ sub Run {
             for my $CurrentField ( keys %AclAction ) {
                 if ( $AclAction{$CurrentField} =~ m{^DF_(.*)_Required}xms ) {
                     my $DynamicFieldName = $1;
-                    $HashDosCampos{$DynamicFieldName} = '2';
+                    $DynamicFieldsHash{$DynamicFieldName} = '2';
                 } elsif ( $AclAction{$CurrentField} =~ m{^DF_(.*)}xms ) {
                     my $DynamicFieldName = $1;
-                    $HashDosCampos{$DynamicFieldName} = '1';
+                    $DynamicFieldsHash{$DynamicFieldName} = '1';
                 }
             }
         }
-
-        # $Kernel::OM->Get('Kernel::System::Log')->Log(
-        #     Priority => 'error',
-        #     Message  => "UUUUUUUUUUUUUUUUUUUUUUUU ".Dumper(%GetParam),
-        # );
-        # $Kernel::OM->Get('Kernel::System::Log')->Log(
-        #     Priority => 'error',
-        #     Message  => "aaaaaaaaaaaaaaaaaaaa 222222222222222".Dumper(%HashDosCampos),
-        # );
 
 		# my $GetParam = $Self->_GetParam(
 		# 	ServiceDynamicID => $ServiceDynamicID,
 		# 	InterfaceName   => $InterfaceName, 
 		# );
 
-        #  Exemplo do objeto que temos que construir
-        #   'Config' => {
-        #                 'FieldOrder' => [
-        #                                   'DynamicField_Agua',
-        #                                   'DynamicField_TipoPeixe'
-        #                                 ],
-        #                 'Fields' => {
-        #                               'DynamicField_TipoPeixe' => {
-        #                                                             'Display' => '1',
-        #                                                             'DescriptionShort' => '',
-        #                                                             'DescriptionLong' => '',
-        #                                                             'DefaultValue' => ''
-        #                                                           },
-        #                               'DynamicField_Agua' => {
-        #                                                        'Display' => '2',
-        #                                                        'DescriptionShort' => '',
-        #                                                        'DescriptionLong' => '',
-        #                                                        'DefaultValue' => ''
-        #                                                      }
-        #                             }
-        #               }
-
+        my %DynamicFieldConfig;
+        for my $DF (keys %DynamicFieldsHash){
+            $DynamicFieldConfig{Fields}->{"DynamicField_$DF"} = {
+                'Display' => $DynamicFieldsHash{$DF},
+                'DescriptionShort' => '',
+                'DescriptionLong' => '',
+                # @TODO = Get Default Value from dynamic field config
+                'DefaultValue' => ''
+            }
+        }
 
 		$ActivityDialogHTML = $Self->_OutputShowHideDynamicFields(
 	 	   	%Param,
 	   	 	# ServiceDynamicID => $ServiceDynamicID,
 			InterfaceName	 => $InterfaceName,
 	    		GetParam     => \%GetParam,
-         DynamicFieldsToShow => \%HashDosCampos,
-		);
+         DynamicFieldsToShow => \%DynamicFieldsHash,
+         DynamicFieldConfg   => \%DynamicFieldConfig,
+		) if $DynamicFieldConfig{Fields};
 
 		if(!$ActivityDialogHTML){
 			$ActivityDialogHTML = 0;
@@ -1486,9 +1473,6 @@ sub _OutputActivityDialog {
 	my $TicketID               = $Param{GetParam}{TicketID};
 	my $ActivityDialogEntityID = $Param{GetParam}{ActivityDialogEntityID};
 	my $AjaxResponseJson='';
-    	# get layout object
-	my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
-	my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
 	# Check needed parameters:
 
 	my %Ticket;
@@ -1505,6 +1489,8 @@ sub _OutputActivityDialog {
 	# get needed object
 	my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 	my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+	my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+	my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
 
 	my $ActivityDialog = $DfByServiceObject->GetDynamicFieldByServiceAndInterface(ServiceID => $Param{ServiceDynamicID},  InterfaceName   => $Param{InterfaceName} );
 	if(!$ActivityDialog->{ID}){
@@ -1548,27 +1534,24 @@ sub _OutputActivityDialog {
 				    FormID              => $Self->{FormID},
 				    GetParam            => $Param{GetParam},
 				    AJAXUpdatableFields => $AJAXUpdatableFields,
-	      	         );
+                );
 				
-               		 if ( !$Response->{Success} ) {
+                if ( !$Response->{Success} ) {
+                    # does not show header and footer again
+                    if ( $Self->{IsMainWindow} ) {
+                        return $LayoutObject->Error(
+                            Message => $Response->{Message},
+                        );
+                    }
+                    $LayoutObject->FatalError(
+                        Message => $Response->{Message},
+                    );
+                }
 
-                    		# does not show header and footer again
-                   			if ( $Self->{IsMainWindow} ) {
-                       			return $LayoutObject->Error(
-                            		Message => $Response->{Message},
-                        		);
-                    	}
+                $Output .= $Response->{HTML};
 
-                    	$LayoutObject->FatalError(
-                        		Message => $Response->{Message},
-                    	);
-                	    }
-	
-                	    $Output .= $Response->{HTML};
-
-               	    $RenderedFields{$CurrentField} = 1;
-
-            	}
+                $RenderedFields{$CurrentField} = 1;
+            }
 
            		# render State
            		elsif ( $Self->{NameToID}->{$CurrentField} eq 'StateID' )
@@ -2186,6 +2169,12 @@ sub _RenderDynamicField {
             my %AclData = %{$PossibleValues};
             @AclData{ keys %AclData } = keys %AclData;
 
+            my %UserID;
+            if($Self->{SessionSource} eq 'CustomerInterface'){
+                $UserID{CustomerUserID} = $Self->{UserID};
+            } else {
+                $UserID{UserID} = $Self->{UserID};
+            }
             # set possible values filter from ACLs
             my $ACL = $TicketObject->TicketAcl(
                 %{ $Param{GetParam} },
@@ -2194,7 +2183,7 @@ sub _RenderDynamicField {
                 ReturnType    => 'Ticket',
                 ReturnSubType => 'DynamicField_' . $DynamicFieldConfig->{Name},
                 Data          => \%AclData,
-                UserID        => $Self->{UserID},
+                %UserID,
             );
             if ($ACL) {
                 my %Filter = $TicketObject->TicketAclData();
@@ -4506,12 +4495,18 @@ sub _GetResponsibles {
     }
 
     # workflow
+    my %UserID;
+    if($Self->{SessionSource} eq 'CustomerInterface'){
+        $UserID{CustomerUserID} = $Self->{UserID};
+    } else {
+        $UserID{UserID} = $Self->{UserID};
+    }
     my $ACL = $TicketObject->TicketAcl(
         %Param,
         ReturnType    => 'Ticket',
         ReturnSubType => 'Responsible',
         Data          => \%ShownUsers,
-        UserID        => $Self->{UserID},
+        %UserID
     );
 
     return { $TicketObject->TicketAclData() } if $ACL;
@@ -4599,12 +4594,18 @@ sub _GetOwners {
     }
 
     # workflow
+    my %UserID;
+    if($Self->{SessionSource} eq 'CustomerInterface'){
+        $UserID{CustomerUserID} = $Self->{UserID};
+    } else {
+        $UserID{UserID} = $Self->{UserID};
+    }
     my $ACL = $TicketObject->TicketAcl(
         %Param,
         ReturnType    => 'Ticket',
         ReturnSubType => 'Owner',
         Data          => \%ShownUsers,
-        UserID        => $Self->{UserID},
+        %UserID
     );
 
     return { $TicketObject->TicketAclData() } if $ACL;
@@ -4865,29 +4866,140 @@ sub _GetAJAXUpdatableFields {
 sub _OutputShowHideDynamicFields {
 	my ( $Self, %Param ) = @_;
 
-	my $DynamicFieldsToShow    = $Param{GetParam}{DynamicFieldsToShow} || {};
-
-$Kernel::OM->Get('Kernel::System::Log')->Log(
-    Priority => 'error',
-    Message  => "aaaaaaaaaaaaaaaaaaaa ".Dumper(%Param),
-);
+	my $DynamicFieldsToShow    = $Param{DynamicFieldsToShow} || {};
+	my $DynamicFieldConfig    = $Param{DynamicFieldConfg} || {};
 
 	my $AjaxResponseJson='';
 	# get needed object
 	my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 	my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 	my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+	my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
 
+	my $ActivityDialog = $DfByServiceObject->GetDynamicFieldByServiceAndInterface(ServiceID => $Param{GetParam}->{ServiceID},  InterfaceName   => $Param{InterfaceName} );
+	my %Ticket;
+
+	my $Output='';
+    # my %RenderedFields = ();
+
+    # my @FieldsOrder;
+    # ################################### MONTAR ORDEM DOS CAMPOS AQUI
+    my $DynamicFieldOrder = $Kernel::OM->Get('Kernel::System::DynamicField')->DynamicFieldList(
+        Valid       => 1,
+        ObjectType  => ['Ticket'],
+        ResultType => 'ARRAY',   # optional, 'ARRAY' or 'HASH', defaults to 'ARRAY'
+        FieldFilter => $DynamicFieldsToShow || {},
+    );
+
+    # Se for retornado alguma lista de campos, devemos então fazer um loop nela 
+    # e criar uma ordenação mista entre ordem do formulário e campos dinamicos hideandshow
+    # que por padrão não estão ordenados, sendo assim, temos que pegar a ordem deles em relação 
+    # aos campos que possuem ordem no cadastro geral de posição de campos
+    my %FieldsOrder;
+    if(ref($DynamicFieldOrder) eq 'ARRAY'){
+        my $LastFieldOrder=0;
+        my $LocalOrder=0;
+
+        for my $Field (@{$DynamicFieldOrder}){
+            # Pega o campo
+            my $DynamicField = $Kernel::OM->Get('Kernel::System::DynamicField')->DynamicFieldGet(
+                ID   => $Field
+            );
+
+            my ($index) = grep { $ActivityDialog->{Config}{FieldOrder}[$_] eq "DynamicField_".$DynamicField->{Name} } (0 .. @{ $ActivityDialog->{Config}{FieldOrder} }-1);
+
+            # Verificar se o campo possui ordem definida no Formulário
+            if ($index){
+                # se tem ordem definida no form, sua ordem é esta então
+                # e definimos ela na chave do FieldsOrder
+                $LastFieldOrder = $index;
+            } else {
+                # Se não tem ordem definida no form, sua ordem é a ordem do último
+                # campo ordenado do formulário + sua ordem no FieldsOrder geral
+                $index = $LastFieldOrder + "0.$DynamicField->{FieldOrder}";
+            }
+            $FieldsOrder{"$index"} = $DynamicField;
+        }
+    }
+
+    # @TODO: Verificar a necessidade da variavel abaixo
+    $Self->{FormID} = 'NewPhoneTicket';
 	my %Error         = ();
 	my %ErrorMessages = ();
-
 	# If we had Errors, we got an Errorhash
 	%Error         = %{ $Param{Error} }         if ( IsHashRefWithData( $Param{Error} ) );
 	%ErrorMessages = %{ $Param{ErrorMessages} } if ( IsHashRefWithData( $Param{ErrorMessages} ) );
 
+    my $AJAXUpdatableFields;
+    # if(ref ($ActivityDialog->{Config}) eq 'HASH'){
+    #     $AJAXUpdatableFields = $Self->_GetAJAXUpdatableFields(
+    #         ActivityDialogFields => $ActivityDialog->{Config}{Fields},
+    #     );
+    # }
 
-	my $Output='';
-    my %RenderedFields = ();
+    for my $Field (sort { $a <=> $b } keys %FieldsOrder){
+        # O que é chamado na na função _RenderDynamicField
+        # my $DynamicFieldHTML = $DynamicFieldBackendObject->EditFieldRender(
+        #     DynamicFieldConfig   => $DynamicFieldConfig,
+        #     PossibleValuesFilter => $PossibleValuesFilter,
+        #     Value                => $Param{GetParam}{ 'DynamicField_' . $Param{FieldName} },
+        #     LayoutObject         => $LayoutObject,
+        #     ParamObject          => $Kernel::OM->Get('Kernel::System::Web::Request'),
+        #     AJAXUpdate           => 1,
+        #     Mandatory            => $Param{ActivityDialogField}->{Display} == 2,
+        #     UpdatableFields      => $Param{AJAXUpdatableFields},
+        #     ServerError          => $ServerError,
+        #     ErrorMessage         => $ErrorMessage,
+        # Class		     => "AddDFS",
+        # );
+        # $Output;
+        my $DynamicFieldName = $FieldsOrder{$Field}->{Name};
+        my %ActivityDialog;
+        $ActivityDialog{Display}=2;
+        my $Response         = $Self->_RenderDynamicField(
+            ActivityDialogField => \%ActivityDialog,
+            FieldName           => $DynamicFieldName,
+            DescriptionShort    => '',
+            DescriptionLong     => '',
+            Ticket              => \%Ticket || {},
+            Error               => \%Error || {},
+            ErrorMessages       => \%ErrorMessages || {},
+            GetParam            => $Param{GetParam},
+            AJAXUpdatableFields => $AJAXUpdatableFields,
+            FormID              => $Self->{FormID},
+        );
+        
+        if ( !$Response->{Success} ) {
+            # does not show header and footer again
+            if ( $Self->{IsMainWindow} ) {
+                return $LayoutObject->Error(
+                    Message => $Response->{Message},
+                );
+            }
+            $LayoutObject->FatalError(
+                Message => $Response->{Message},
+            );
+        }
+
+        $Output .= $Response->{HTML};
+    }
+
+    # if(ref ($ActivityDialog->{Config}) eq 'HASH'){
+    #     # $AJAXUpdatableFields = $Self->_GetAJAXUpdatableFields(
+    #     #     ActivityDialogFields => $ActivityDialog->{Config}{Fields},
+    #     # );
+    #     # Loop through ActivityDialogFields and render their output
+	#     DIALOGFIELD:
+	#     for my $CurrentField ( @{ $ActivityDialog->{Config}{FieldOrder} } ) {
+
+    #         my %FieldData = %{ $ActivityDialog->{Config}{Fields}{$CurrentField} };
+
+	# 	    # We render just visible ActivityDialogFields
+    #         next DIALOGFIELD if !$FieldData{Display};
+
+    #         ### FAZER COISAS AQUI!!!!!!!!!1
+    #     }
+    # }
 
 	# reload parent window
 	if ( $Param{ParentReload} ) {

@@ -42,7 +42,8 @@ sub new {
     # if($ServiceID eq '' or $Subaction eq ''){
     #     return $Self;
     # }
-    my $DynamicFieldsByService = $DfByServiceObject->GetDynamicFieldByService(ServiceID => $ServiceID);
+    my $DynamicFieldsByService;
+    $DynamicFieldsByService = $DfByServiceObject->GetDynamicFieldByService(ServiceID => $ServiceID) if $ServiceID;
     my %HashDosCampos;
 
     # COMPLEMENTO: 16-05-06
@@ -153,6 +154,13 @@ sub new {
 
     my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
+    my %UserID;
+    if($Self->{SessionSource} eq 'CustomerInterface'){
+        $UserID{CustomerUserID} = $Self->{UserID};
+    } else {
+        $UserID{UserID} = $Self->{UserID};
+    }
+
     my $ACL = $TicketObject->TicketAcl(
         Data          => \%PossibleActions,
         # Action        => $Action,
@@ -164,8 +172,10 @@ sub new {
         # },
         ReturnType    => 'Action',
         ReturnSubType => '-',
-        UserID        => $Self->{UserID},
+        %UserID,
     );
+
+
     my %AclAction = %PossibleActions;
     if ($ACL) {
         %AclAction = $TicketObject->TicketAclActionData();

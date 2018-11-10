@@ -27,7 +27,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
      *      This function initializes the special module functions.
      */
     TargetNS.Init = function () {
-		console.log('inicializou');
 	    var arrayJSON;
 		var objectJSON;
 
