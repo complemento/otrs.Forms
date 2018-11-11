@@ -10,13 +10,6 @@
 var Core = Core || {};
 Core.Agent = Core.Agent || {};
 
-/**
- * @namespace Core.Agent.TicketProcess
- * @memberof Core.Agent
- * @author OTRS AG
- * @description
- *      This namespace contains the special module functions for TicketProcess.
- */
 Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
     /**
@@ -139,9 +132,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 				Core.UI.InputFields.Activate();
 	//////////////////////////////////////////////////
 						if (!Response) {
-	
-							// We are out of the OTRS App scope, that's why an exception would not be caught. Therefor we handle the error manually.
-	//                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No content received.", 'CommunicationError'));
 							$('#AJAXLoader').addClass('Hidden');
 						}
 						else if ($ElementToUpdate && isJQueryObject($ElementToUpdate) && $ElementToUpdate.length) {
@@ -249,8 +239,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 						}
 						else {
-	
-							// We are out of the OTRS App scope, that's why an exception would not be caught. Therefor we handle the error manually.
 	//                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No such element id: " + $ElementToUpdate.attr('id') + " in page!", 'CommunicationError'));
 							$('#AJAXLoader').addClass('Hidden');
 						}
@@ -349,6 +337,14 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						{
 							return;
 						}
+						
+						// Aqui limpamos os campos, então esta não é a ideia aqui
+						$('.AddDFS').each(function(){
+							var $that =  $(this);
+							$($that).parent().parent().remove();
+						});
+
+
 						var res = Response.split(':$$:Add:$$:');
 						//LOOP QUE PEGA OS VALORES E OS NOMES 
 						Response = res[0];
@@ -403,9 +399,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 			Core.UI.InputFields.Activate();
 //////////////////////////////////////////////////
 					if (!Response) {
-
-						// We are out of the OTRS App scope, that's why an exception would not be caught. Therefor we handle the error manually.
-//                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No content received.", 'CommunicationError'));
 						$('#AJAXLoader').addClass('Hidden');
 					}
 					else if ($ElementToUpdate && isJQueryObject($ElementToUpdate) && $ElementToUpdate.length) {
@@ -513,8 +506,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 					}
 					else {
-
-						// We are out of the OTRS App scope, that's why an exception would not be caught. Therefor we handle the error manually.
 //                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No such element id: " + $ElementToUpdate.attr('id') + " in page!", 'CommunicationError'));
 						$('#AJAXLoader').addClass('Hidden');
 					}

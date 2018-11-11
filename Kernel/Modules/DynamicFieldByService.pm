@@ -4955,7 +4955,7 @@ sub _OutputShowHideDynamicFields {
         # $Output;
         my $DynamicFieldName = $FieldsOrder{$Field}->{Name};
         my %ActivityDialog;
-        $ActivityDialog{Display}=2;
+        $ActivityDialog{Display}=$DynamicFieldsToShow->{$FieldsOrder{$Field}->{Name}};
         my $Response         = $Self->_RenderDynamicField(
             ActivityDialogField => \%ActivityDialog,
             FieldName           => $DynamicFieldName,
