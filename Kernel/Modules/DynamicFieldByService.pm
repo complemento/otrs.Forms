@@ -4916,7 +4916,7 @@ sub _OutputShowHideDynamicFields {
             } else {
                 # Se não tem ordem definida no form, sua ordem é a ordem do último
                 # campo ordenado do formulário + sua ordem no FieldsOrder geral
-                $index = $LastFieldOrder + "0.$DynamicField->{FieldOrder}";
+                $index = $LastFieldOrder + ".$DynamicField->{FieldOrder}";
             }
             $FieldsOrder{"$index"} = $DynamicField;
         }
@@ -4937,7 +4937,18 @@ sub _OutputShowHideDynamicFields {
     #     );
     # }
 
-    for my $Field (sort { $a <=> $b } keys %FieldsOrder){
+    use Data::Dumper;
+
+    my @data = keys %FieldsOrder;
+    my @sorted =
+        map { $_->[0] }
+        sort { $a->[1] <=> $b->[1] or $a->[2] <=> $b->[2]  }
+        map {
+        my @l = split(/\./);
+        [$_, length($l[1]), $l[1]] }
+        @data;
+
+    foreach my $Field (@sorted){
         # O que é chamado na na função _RenderDynamicField
         # my $DynamicFieldHTML = $DynamicFieldBackendObject->EditFieldRender(
         #     DynamicFieldConfig   => $DynamicFieldConfig,
@@ -4959,8 +4970,8 @@ sub _OutputShowHideDynamicFields {
         my $Response         = $Self->_RenderDynamicField(
             ActivityDialogField => \%ActivityDialog,
             FieldName           => $DynamicFieldName,
-            DescriptionShort    => '',
-            DescriptionLong     => '',
+            DescriptionShort    => 'aaa',
+            DescriptionLong     => 'aaa',
             Ticket              => \%Ticket || {},
             Error               => \%Error || {},
             ErrorMessages       => \%ErrorMessages || {},
@@ -4981,7 +4992,7 @@ sub _OutputShowHideDynamicFields {
             );
         }
 
-        $Output .= $Response->{HTML};
+        $Output .= $Response->{HTML}.$Field;
     }
 
     # if(ref ($ActivityDialog->{Config}) eq 'HASH'){
