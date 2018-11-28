@@ -4916,7 +4916,7 @@ sub _OutputShowHideDynamicFields {
             } else {
                 # Se não tem ordem definida no form, sua ordem é a ordem do último
                 # campo ordenado do formulário + sua ordem no FieldsOrder geral
-                $index = $LastFieldOrder + ".$DynamicField->{FieldOrder}";
+                $index = "$DynamicField->{FieldOrder}";
             }
             $FieldsOrder{"$index"} = $DynamicField;
         }
@@ -4948,7 +4948,7 @@ sub _OutputShowHideDynamicFields {
         [$_, length($l[1]), $l[1]] }
         @data;
 
-    foreach my $Field (@sorted){
+    for my $Field (sort { $a <=> $b } keys %FieldsOrder){
         # O que é chamado na na função _RenderDynamicField
         # my $DynamicFieldHTML = $DynamicFieldBackendObject->EditFieldRender(
         #     DynamicFieldConfig   => $DynamicFieldConfig,
