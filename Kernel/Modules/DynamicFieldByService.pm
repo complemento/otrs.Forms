@@ -4970,8 +4970,8 @@ sub _OutputShowHideDynamicFields {
         my $Response         = $Self->_RenderDynamicField(
             ActivityDialogField => \%ActivityDialog,
             FieldName           => $DynamicFieldName,
-            DescriptionShort    => 'aaa',
-            DescriptionLong     => 'aaa',
+            DescriptionShort    => '',
+            DescriptionLong     => '',
             Ticket              => \%Ticket || {},
             Error               => \%Error || {},
             ErrorMessages       => \%ErrorMessages || {},
@@ -4992,7 +4992,7 @@ sub _OutputShowHideDynamicFields {
             );
         }
 
-        $Output .= $Response->{HTML}.$Field;
+        $Output .= $Response->{HTML};
     }
 
     # if(ref ($ActivityDialog->{Config}) eq 'HASH'){
