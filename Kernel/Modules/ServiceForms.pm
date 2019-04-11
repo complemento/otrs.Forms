@@ -54,6 +54,7 @@ sub new {
     if ( $ParamObject->GetParam( Param => 'AttachmentUpload' ) ) {
         $IsUpload                = 1;
     }
+# return $Self;    
     # Para execução se não houver ServiceID
     #if($IsUpload){
         #return $Self;
