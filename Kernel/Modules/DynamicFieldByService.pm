@@ -4909,7 +4909,7 @@ sub _OutputShowHideDynamicFields {
             my ($index) = grep { $ActivityDialog->{Config}{FieldOrder}[$_] eq "DynamicField_".$DynamicField->{Name} } (0 .. @{ $ActivityDialog->{Config}{FieldOrder} }-1);
 
             # Verificar se o campo possui ordem definida no Formulário
-            if ($index){
+            if (defined($index)){
                 # se tem ordem definida no form, sua ordem é esta então
                 # e definimos ela na chave do FieldsOrder
                 $LastFieldOrder = $index;
