@@ -502,9 +502,7 @@ sub DynamicFieldByServiceList {
 
 	my %Result;
 	for my $Row (@$Table){
-		$Result{$Row->[0]} = {
-			"Name" => $Row->[1]
-		}
+		$Result{$Row->[0]} = $Row->[1];
 	}
 
 	return %Result;

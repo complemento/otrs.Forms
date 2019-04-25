@@ -329,8 +329,6 @@ sub Run {
         if ($GetParam{ViewMode} eq 'Popup'){
                     $Output = $LayoutObject->Header(
                     Type      => 'Small',
-#                    Value     => $Ticket{Number},
-                    BodyClass => 'Popup',
                 );
 
         } else {
