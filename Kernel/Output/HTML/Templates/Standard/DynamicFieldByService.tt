@@ -25,7 +25,7 @@
 [% RenderBlockEnd("ActionOverview") %]
 [% RenderBlockStart("ActionAdd") %]
                     <li>
-                        <a href="[% Env("Baselink") %]Action=[% Env("Action") %];Subaction=Add" class="CallForAction Plus"><span>[% Translate("Add Template") | html %]</span></a>
+                        <a href="[% Env("Baselink") %]Action=[% Env("Action") %];Subaction=Add" class="CallForAction Plus"><span>[% Translate("Add Form") | html %]</span></a>
                     </li>
 [% RenderBlockEnd("ActionAdd") %]
                 </ul>
@@ -121,10 +121,10 @@
         <div class="WidgetSimple">
             <div class="Header">
 [% RenderBlockStart("HeaderAdd") %]
-                <h2>[% Translate("Add Template") | html %]</h2>
+                <h2>[% Translate("Add Form") | html %]</h2>
 [% RenderBlockEnd("HeaderAdd") %]
 [% RenderBlockStart("HeaderEdit") %]
-                <h2>[% Translate("Edit Template") | html %]</h2>
+                <h2>[% Translate("Edit Form") | html %]</h2>
 [% RenderBlockEnd("HeaderEdit") %]
             </div>
             <div class="Content">
@@ -154,15 +154,9 @@
                         </div>
                         <div class="Clear"></div>
 
-                        <label class="Mandatory" for="Comments"><span class="Marker">*</span> [% Translate("Comments") | html %]:</label>
+                        <label for="Comments">[% Translate("Comments") | html %]:</label>
                         <div class="Field">
-                            <input type="text" name="Comments" id="Comments" value="[% Data.Comments | html %]" class="W50pc Validate_Required [% Data.TitleInvalid | html %]" maxlength="200"/>
-                            <div id="TitleError" class="TooltipErrorMessage">
-                                <p>[% Translate("This field is required.") | html %]</p>
-                            </div>
-                            <div id="TitleServerError" class="TooltipErrorMessage">
-                                <p>[% Translate("This field is required.") | html %]</p>
-                            </div>
+                            <input type="text" name="Comments" id="Comments" value="[% Data.Comments | html %]" class="W50pc [% Data.TitleInvalid | html %]" maxlength="200"/>
                         </div>
                         <div class="Clear"></div>
 			 <label class="Mandatory" for="Frontend"> <span class="Marker">*</span> [% Translate("Available in") | html %]:</label>
@@ -190,6 +184,12 @@
                         </div>
                         <div class="Clear"></div>
 
+                        <label for="HideArticle">[% Translate("Hide Article (if true, provide a default Subject and Body bellow)") | html %]:</label>
+
+                        <div class="Field">
+                            <input type="checkbox" id="HideArticle" name="HideArticle" title="Hide Article" value="1">
+                        </div>
+                        <div class="Clear"></div>
 
                         <label class="" for="Subject">[% Translate("Subject") | html %]:</label>
                         <div class="Field">

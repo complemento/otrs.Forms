@@ -190,10 +190,6 @@ sub new {
 	    }
     }
 
-# $Kernel::OM->Get('Kernel::System::Log')->Log(
-#     Priority => 'error',
-#     Message  => "aaaaaaaaaaaaaaaaaaaa 1111111111111111111111111111".Dumper(%HashDosCampos),
-# );
     # Exemplo:
     # Altera o valor dos campos
     $ConfigObject->Set(

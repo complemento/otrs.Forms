@@ -21,7 +21,6 @@
             <Hash>
                 <Item Key="Module">Kernel::Output::HTML::ServicePreferences::ServiceForms</Item>
                 <Item Key="Label" Translatable="1">Custom Form for this Service</Item>
-<!--                <Item Key="Desc" Translatable="1">Associação com o Forms</Item>-->
                 <Item Key="Block">Option</Item>
                 <Item Key="PrefKey">Forms</Item>
             </Hash>

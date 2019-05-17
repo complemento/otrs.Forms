@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <otrs_package version="1.0">
     <Name>Forms</Name>
-    <Version>6.0.4</Version>
+    <Version>6.0.5</Version>
     <Framework>6.0.x</Framework>
     <Vendor>Ligero</Vendor>
     <URL>http://www.complemento.net.br/</URL>
@@ -10,10 +10,11 @@
     <Description Lang="pt_BR">Crie formulários usando Campos Dinâmicos para cada Serviço</Description>
     <IntroInstall Type="post" Lang="en" Title="Attention!">Try on a test system before uploading an production server. Tested on OTRS 3.1, 3.2 and 5.0</IntroInstall>
     <Filelist>
-	<File Permission="644" Location="Kernel/Config/Files/XML/DynamicFieldByService.xml"></File>        
+	<File Permission="644" Location="Kernel/Config/Files/XML/Forms.xml"></File>        
 	<File Permission="644" Location="Kernel/Config/Files/XML/Service.Forms.xml"></File> 
 	<File Permission="644" Location="Kernel/Modules/DynamicFieldByService.pm"></File> 
 	<File Permission="644" Location="Kernel/Modules/ServiceForms.pm"></File> 
+	<File Permission="644" Location="Kernel/Language/pt_BR_Forms.pm"></File> 
 	<File Permission="644" Location="var/httpd/htdocs/js/Core.Agent.Admin.DynamicFieldByService.js"></File>
 	<File Permission="644" Location="var/httpd/htdocs/js/Core.Agent.DynamicFieldByService.js"></File>
 	<File Permission="644" Location="Kernel/Output/HTML/OutputFilterDynamicFieldByService.pm"></File>

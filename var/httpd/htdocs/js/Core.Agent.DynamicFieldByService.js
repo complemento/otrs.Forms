@@ -24,9 +24,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		var objectJSON;
 
 		var reloadFields = "";
-		// if($('[name=LinkTicketID]').length > 0 && $('[name=LinkTicketID]').val() != "" || $("[name=Action]").val() == "CustomerTicketMessage" && $("#ServiceID").val() != ""){
-		// 	setTimeout(function(){ $('#ServiceID').trigger("change"); }, 1);
-		// }
 		// Monitora a mudança do campo Serviço e dos campos dinamicos
         $("#ServiceID[data-ligeroform!='ok']").each(function(){
 			$(this).bind('change', function () {
@@ -41,6 +38,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 					Action: 'DynamicFieldByService',
 					Subaction: 'DisplayActivityDialogAJAX',
 					ServiceDynamicID: $('#ServiceID').val(),
+					SelectedCustomerUser: ''+$('#SelectedCustomerUser').val(),
+					CustomerID: ''+$('#CustomerID').val(),
 					InterfaceName: formID,
 					IsAjaxRequest: 1,
 					IsMainWindow: 1
