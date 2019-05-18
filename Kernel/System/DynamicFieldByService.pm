@@ -100,8 +100,8 @@ sub DynamicTemplateAdd {
             );
             return;
         }
-    
-    
+
+		$Param{Config}->{HideArticle} = $Param{HideArticle}||0;
         # dump layout and config as string
         $Config = $Kernel::OM->Get('Kernel::System::YAML')->Dump( Data => $Param{Config} );
     }
@@ -113,10 +113,10 @@ sub DynamicTemplateAdd {
 	
     return if !$DBObject->Do(
         SQL => '
-            INSERT INTO dfs ( name, comments, valid_id, content_type, create_time, create_by, change_time, change_by, subject, body, type_id, workflow_id, frontend, config )
+            INSERT INTO dfs ( name, comments, valid_id, content_type, create_time, create_by, change_time, change_by, subject, body, type_id, workflow_id, frontend, config)
             VALUES (?, ?, ?, ?, current_timestamp, ?, current_timestamp, ?, ?, ?, ?, ?, ?, ?)',
         Bind => [
-            \$Param{Name}, \$Param{Comments}, \$Param{ValidID}, \$Param{ContetType},\$Param{UserID},\$Param{UserID},\$Param{Subject},\$Param{Message},\$Param{TypeID},\$Param{WorkflowID},\$Param{Frontend}, \$Config,
+            \$Param{Name}, \$Param{Comments}, \$Param{ValidID}, \$Param{ContetType},\$Param{UserID},\$Param{UserID},\$Param{Subject},\$Param{Message},\$Param{TypeID},\$Param{WorkflowID},\$Param{Frontend}, \$Config
         ],
     );
 
@@ -164,6 +164,7 @@ sub DynamicTemplateUpdate{
 	my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
 
     my $Config='';
+
 	if (  $Param{Config}->{Fields} ) {
 	    if ( !IsHashRefWithData( $Param{Config} ) ) {
             	$Kernel::OM->Get('Kernel::System::Log')->Log(
@@ -181,6 +182,7 @@ sub DynamicTemplateUpdate{
             	return;
         	}
 	    if ( ref $Param{Config}->{FieldOrder} eq 'ARRAY' ) {
+			$Param{Config}->{HideArticle} = $Param{HideArticle}||0;
         	$Config = $Kernel::OM->Get('Kernel::System::YAML')->Dump( Data => $Param{Config} );
     	}
 	}
@@ -279,6 +281,7 @@ sub DynamicFieldByServiceGet {
 		    WorkflowId	  => $Data[11], 
             Frontend	  => $Data[12], 
 			Config	      => $Config,
+			HideArticle   => $Config->{HideArticle}||0,
         );
     }
 
@@ -389,6 +392,7 @@ sub GetDynamicFieldByServiceAndInterface {
 	        Frontend	  => $Data[12], 
 		    ServiceID	  => $Param{ServiceID}, 
     	    Config	  	  => $Config,
+			HideArticle   => $Config->{HideArticle}||0,
         );
     }
 
@@ -470,6 +474,7 @@ sub GetDynamicFieldByService {
 					Frontend	  => $Data[12], 
 			ServiceID	  => $Param{ServiceID}, 
 			Config	      => $Config,
+			HideArticle   => $Config->{HideArticle}||0,
 		);
     }
 

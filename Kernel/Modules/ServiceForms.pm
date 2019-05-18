@@ -38,10 +38,10 @@ sub new {
     my $ServiceID  = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam( Param => 'ServiceID' ) || '';
 	my $Subaction = $Self->{Subaction} || '';	    
 	 
-    # Para execução se não houver ServiceID
-    # if($ServiceID eq '' or $Subaction eq ''){
-    #     return $Self;
-    # }
+    # Para execução se não houver SubAction
+    if($Subaction eq ''){
+        return $Self;
+    }
     my $DynamicFieldsByService;
     $DynamicFieldsByService = $DfByServiceObject->GetDynamicFieldByService(ServiceID => $ServiceID) if $ServiceID;
     my %HashDosCampos;

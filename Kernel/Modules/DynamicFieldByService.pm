@@ -81,7 +81,6 @@ sub Run {
 	if ( $Self->{Subaction} eq 'Edit' ) {
 		my $ID = $ParamObject->GetParam( Param => 'ID' ) || '';
 		my %Data = $DfByServiceObject->DynamicFieldByServiceGet( ID => $ID );
-
 		my $Output = $LayoutObject->Header();
 		$Output .= $LayoutObject->NavigationBar();
 		$Self->_Edit(
@@ -353,7 +352,7 @@ sub Run {
 		};
 
 		my ( %GetParam, %Errors );
-		for my $Parameter (qw( ID Name TypeID ServiceID Comments  Message Subject ValidID Frontend  PopupRedirect PopupRedirectAction PopupRedirectSubaction PopupRedirectID PopupRedirectEntityID RequiredLock )) {
+		for my $Parameter (qw( ID Name TypeID ServiceID Comments HideArticle Message Subject ValidID Frontend  PopupRedirect PopupRedirectAction PopupRedirectSubaction PopupRedirectID PopupRedirectEntityID RequiredLock )) {
 			if($Parameter ne  "RequiredLock"){
 				$FormsData->{$Parameter} =  $ParamObject->GetParam( Param => $Parameter ) || '';
 				$FormsData->{Config}->{$Parameter} = $ParamObject->GetParam( Param => $Parameter ) || '';
@@ -563,18 +562,19 @@ sub Run {
 
 		# otherwise save configuration and return to overview screen
 		my $Success = $DfByServiceObject->DynamicTemplateUpdate(
-			ID        => $FormsData->{ID},
-	    	Name      => $FormsData->{Name},
-			ServiceID => $FormsData->{ServiceID},
-			TypeID    => $FormsData->{TypeID},
-			Comments  => $FormsData->{Comments},	
-			Message   => $FormsData->{Message},	
-			Subject   => $FormsData->{Subject},	
-			ValidID   => $FormsData->{ValidID},	
-			Frontend  => $FormsData->{Frontend},	
-			Title	  => $FormsData->{Title},	
-			Config    => $FormsData->{Config},
-			UserID    => $Self->{UserID},
+			ID          => $FormsData->{ID},
+	    	Name        => $FormsData->{Name},
+			ServiceID   => $FormsData->{ServiceID},
+			TypeID      => $FormsData->{TypeID},
+			Comments    => $FormsData->{Comments},	
+			Message     => $FormsData->{Message},	
+			Subject     => $FormsData->{Subject},	
+			ValidID     => $FormsData->{ValidID},	
+			Frontend    => $FormsData->{Frontend},	
+			Title	    => $FormsData->{Title},	
+			Config      => $FormsData->{Config},
+			UserID      => $Self->{UserID},
+			HideArticle => $FormsData->{HideArticle},
 		);
 		$Self->_Overview();
 		my $Output = $LayoutObject->Header();
@@ -598,7 +598,7 @@ sub Run {
 		my @NewIDs = $ParamObject->GetArray( Param => 'IDs' );
 		my ( %GetParam, %Errors );
 
-		for my $Parameter (qw(Name TypeID ServiceID Comments  Message Subject ValidID Frontend  PopupRedirect PopupRedirectAction PopupRedirectSubaction PopupRedirectID PopupRedirectEntityID RequiredLock )) {
+		for my $Parameter (qw(Name TypeID ServiceID Comments HideArticle Message Subject ValidID Frontend  PopupRedirect PopupRedirectAction PopupRedirectSubaction PopupRedirectID PopupRedirectEntityID RequiredLock )) {
 		    if($Parameter ne  "RequiredLock"){
 		    	$FormsData->{$Parameter} =  $ParamObject->GetParam( Param => $Parameter ) || '';
 			    $FormsData->{Config}->{$Parameter} = $ParamObject->GetParam( Param => $Parameter ) || '';
@@ -779,6 +779,7 @@ sub Run {
 			TypeID    							=> $FormsData->{TypeID},
 			ServiceID 							=> $FormsData->{ServiceID},
 			Comments  							=> $FormsData->{Comments},	
+			HideArticle  						=> $FormsData->{HideArticle},	
 			Message   							=> $FormsData->{Message},	
 			Subject   							=> $FormsData->{Subject},	
 			ValidID   							=> $FormsData->{ValidID},	
@@ -1288,11 +1289,11 @@ sub _Edit {
     );
 #
     # extract parameters from config
+    $Param{HideArticle}      = $Param{Config}->{HideArticle};
     $Param{DescriptionShort} = $Param{FormsData}->{Config}->{DescriptionShort};
     $Param{DescriptionLong}  = $Param{FormsData}->{Config}->{DescriptionLong};
     $Param{SubmitAdviceText} = $Param{FormsData}->{Config}->{SubmitAdviceText};
     $Param{SubmitButtonText} = $Param{FormsData}->{Config}->{SubmitButtonText};
-
     my $Output = $LayoutObject->Header(
         Value => $Param{Title},
         Type  => 'Small',
@@ -1879,6 +1880,12 @@ sub _OutputActivityDialog {
 	my $AgentJsonFieldConfig;
 	my $CustomerJsonFieldConfig;	
 	my $JSONObject = $Kernel::OM->Get('Kernel::System::JSON');
+	if($ActivityDialog->{HideArticle}){
+		%JsonReturn = ('HideArticle' => $ActivityDialog->{HideArticle});
+		$JsonType =  "@%@%@". $JSONObject->Encode(
+						Data => \%JsonReturn,
+		);
+	}
 	if($ActivityDialog->{TypeID}){
 		%JsonReturn = ('TypeID' => $ActivityDialog->{TypeID});
 		$JsonType =  "@%@%@". $JSONObject->Encode(

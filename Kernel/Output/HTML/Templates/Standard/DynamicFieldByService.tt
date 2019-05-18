@@ -184,10 +184,10 @@
                         </div>
                         <div class="Clear"></div>
 
-                        <label for="HideArticle">[% Translate("Hide Article (if true, provide a default Subject and Body bellow)") | html %]:</label>
+                        <label for="HideArticle">[% Translate("Hide Article on Customer Interface (if true, provide a default Subject and Body bellow)") | html %]:</label>
 
                         <div class="Field">
-                            <input type="checkbox" id="HideArticle" name="HideArticle" title="Hide Article" value="1">
+                            <input type="checkbox" id="HideArticle" name="HideArticle" title="Hide Article" [% IF Data.HideArticle %]checked="checked"[% END %] value="1">
                         </div>
                         <div class="Clear"></div>
 
