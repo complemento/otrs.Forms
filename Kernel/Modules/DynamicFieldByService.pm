@@ -1019,7 +1019,7 @@ sub _Edit {
         },
         Name         => 'Frontend',
         ID           => 'Frontend',
-        SelectedID   => $Param{Frontend} || '',
+        SelectedID   => $Param{Frontend} || 'BothInterfaces',
         Sort         => 'AlphanumericKey',
         Translation  => 1,
         PossibleNone => 0,

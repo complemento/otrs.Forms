@@ -52,7 +52,7 @@ sub new {
 		    for my $CurrentField ( @{ $DynamicFieldsByService->{Config}{FieldOrder} } ) {
 			    my %FieldData = %{ $DynamicFieldsByService->{Config}{Fields}{$CurrentField} };
 
-			    next DIALOGFIELD if !$FieldData{Display};
+			    # next DIALOGFIELD if !$FieldData{Display};
 	
 	       	    # render DynamicFields
 	            if ( $CurrentField =~ m{^DynamicField_(.*)}xms ) {
@@ -67,6 +67,7 @@ sub new {
 	foreach my $Keys (keys %{$HashOld->{DynamicField}}){
 		$HashDosCampos{$Keys} = $HashOld->{DynamicField}{$Keys};
 	}
+
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
     # Get all DynamicFields from Ticket And Article
     my $DynamicFieldObject = $Kernel::OM->Get('Kernel::System::DynamicField');
