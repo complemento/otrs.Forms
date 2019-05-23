@@ -199,5 +199,16 @@
                 </Item>
             </Hash>
         </Value>
+    </Setting>
+    <Setting Name="Ticket::EventModulePost###HiddenDynamicFields" Required="0" Valid="1">
+        <Description Translatable="1">Event module registration.</Description>
+        <Navigation>Core::Forms</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="Module">Kernel::System::Ticket::Event::HiddenDynamicFields</Item>
+                <Item Key="Transaction">1</Item>
+                <Item Key="Event">TicketCreate|TicketServiceUpdate</Item>
+            </Hash>
+        </Value>
     </Setting>	
 </otrs_config>
