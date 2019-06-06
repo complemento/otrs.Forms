@@ -1289,7 +1289,7 @@ sub _Edit {
     );
 #
     # extract parameters from config
-    $Param{HideArticle}      = $Param{Config}->{HideArticle};
+    $Param{HideArticle}      = (defined($Param{Config}) && $Param{Config} ne "" && defined($Param{Config}->{HideArticle})) ? $Param{Config}->{HideArticle} : 0;
     $Param{DescriptionShort} = $Param{FormsData}->{Config}->{DescriptionShort};
     $Param{DescriptionLong}  = $Param{FormsData}->{Config}->{DescriptionLong};
     $Param{SubmitAdviceText} = $Param{FormsData}->{Config}->{SubmitAdviceText};
@@ -1343,6 +1343,8 @@ sub _Overview {
     my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+    my $LogObject    = $Kernel::OM->Get('Kernel::System::Log');
+
     $LayoutObject->Block(
         Name => 'Overview',
         Data => \%Param,
@@ -1374,6 +1376,11 @@ sub _Overview {
         for my $ID ( sort { $List{$a} cmp $List{$b} } keys %List ) {
 
             my %Data = $Kernel::OM->Get('Kernel::System::DynamicFieldByService')->DynamicFieldByServiceGet( ID => $ID, );
+            #$LogObject->Log(
+            #    Priority => 'error',
+            #    Message  => Dumper(\%List)
+            #);
+
             $LayoutObject->Block(
                 Name => 'OverviewResultRow',
                 Data => {

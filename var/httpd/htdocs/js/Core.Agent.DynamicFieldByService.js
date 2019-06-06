@@ -341,7 +341,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							$($that).parent().parent().remove();
 						});
 
-
 						var res = Response.split(':$$:Add:$$:');
 						//LOOP QUE PEGA OS VALORES E OS NOMES 
 						Response = res[0];
@@ -450,6 +449,11 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 							$(".AddDFS").each(function () {
 
+								// clean old fields not rendered via ajax ( ugly as f*** )
+								$('#' + $(this).attr('id')).not('.AddDFS').each(function() {
+									var $that = $(this);
+									$($that).parent().parent().remove();
+								});
 
 								if ($(this).hasClass('DateSelection') || $(this).hasClass('Validate_MaxLength')) {
 									return true;
