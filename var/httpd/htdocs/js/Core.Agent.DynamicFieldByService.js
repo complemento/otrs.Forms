@@ -109,8 +109,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								objectJSON = $.parseJSON(arrayJSON[i]);
 								$.each(objectJSON, function (key, val) {
 									if (key && val) {
-										if (key === "Message") {
-											window.CKEDITOR.instances['RichText'].setData(val);
+										if (key === "Message" && val.trim().length) {
+											setTimeout( function() {
+												window.CKEDITOR.instances['RichText'].setData(val);
+											}, 1000);
 											reloadFields += "" + key + ",";
 										} else if (key === "HideArticle" && val === '1') {
 											$('#Subject').parent().hide();
@@ -207,10 +209,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 								// Set pre loaded field values
 								jQuery.each( Core.Agent.DynamicFieldByServicePreLoad, function( oKey, oObj ) {
-									if (oKey == 'Message') {
+									if (oKey == 'Message' && oObj.value.length) {
 										setTimeout( function() {
 											window.CKEDITOR.instances['RichText'].setData( oObj.value );
-										}, 2000);
+										}, 1000);
 									} else {
 										$( '#' + oKey ).val( oObj.value ).attr('class',oObj.attr);
 									}
@@ -382,7 +384,9 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							$.each(objectJSON, function (key, val) {
 								if (key && val) {
 									if (key === "Message") {
-										window.CKEDITOR.instances['RichText'].setData(val);
+										setTimeout( function() {
+											window.CKEDITOR.instances['RichText'].setData(val);
+										},1000);
 										reloadFields += "" + key + ",";
 									} else if (key === "AgentFieldConfig") {
 										AgentFieldConfigInsert = "" + val + "";
