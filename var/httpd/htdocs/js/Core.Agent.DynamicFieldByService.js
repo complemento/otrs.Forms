@@ -9,7 +9,7 @@
 
 var Core = Core || {};
 Core.Agent = Core.Agent || {};
-
+Core.Agent.DynamicFieldByServicePreLoad = {};
 Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 	/**
@@ -79,6 +79,22 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							if (Response == 0) {
 								return;
 							}
+
+							// Get form values before dynamic field update
+							$(Response).find('.AddDFS').each(function() {
+								var dfsID = $(this).attr('id');
+								$('#' + dfsID).not('.AddDFS').each(function() {
+									Core.Agent.DynamicFieldByServicePreLoad[ dfsID ] = {
+										value: $(this).val(),
+										attr:  $(this).attr('class')
+									};
+									$(this).parent().parent().remove();
+								});
+							});
+							Core.Agent.DynamicFieldByServicePreLoad[ 'Message' ] = {
+								value: $('#RichText').val()
+							};
+
 							var res = Response.split(':$$:Add:$$:');
 							//LOOP QUE PEGA OS VALORES E OS NOMES 
 							Response = res[0];
@@ -189,8 +205,19 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								$('#AJAXLoader').addClass('Hidden');
 								$('#AJAXDialog').val('1');
 
-								$(".AddDFS").each(function () {
+								// Set pre loaded field values
+								jQuery.each( Core.Agent.DynamicFieldByServicePreLoad, function( oKey, oObj ) {
+									if (oKey == 'Message') {
+										setTimeout( function() {
+											window.CKEDITOR.instances['RichText'].setData( oObj.value );
+										}, 2000);
+									} else {
+										$( '#' + oKey ).val( oObj.value ).attr('class',oObj.attr);
+									}
+								});
+								Core.Agent.DynamicFieldByServicePreLoad = {};
 
+								$(".AddDFS").each(function () {
 
 									if ($(this).hasClass('DateSelection') || $(this).hasClass('Validate_MaxLength')) {
 										return true;
@@ -236,7 +263,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 
 							} else {
-								//                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No such element id: " + $ElementToUpdate.attr('id') + " in page!", 'CommunicationError'));
 								$('#AJAXLoader').addClass('Hidden');
 							}
 						}, 'html');
