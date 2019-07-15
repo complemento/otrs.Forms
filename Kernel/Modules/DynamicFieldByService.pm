@@ -95,6 +95,24 @@ sub Run {
 		return $Output;
 	}
 
+    if ( $Self->{Subaction} eq 'Copy' ) {
+		my $ID = $ParamObject->GetParam( Param => 'ID' ) || '';
+		my %Data = $DfByServiceObject->DynamicFieldByServiceGet( ID => $ID );
+		my $Output = $LayoutObject->Header();
+		$Output .= $LayoutObject->NavigationBar();
+		$Self->_Edit(
+		    Action => 'Copy',
+		    %Data,
+		);
+
+		$Output .= $LayoutObject->Output(
+		    TemplateFile => 'DynamicFieldByService',
+		    Data         => \%Param,
+		);
+		$Output .= $LayoutObject->Footer();
+		return $Output;
+	}
+
     ##################### SUBACTION THAT RENDERS THE FORMS ON AGENT OR CUSTOMER SCREEN ################
 	if ( $Self->{Subaction} eq 'DisplayActivityDialogAJAX' && $ServiceDynamicID && $InterfaceName ) {
 		my $GetParam = $Self->_GetParam(
@@ -419,7 +437,7 @@ sub Run {
 		# localize available fields
 		my %AvailableFields = %{$AvailableFieldsList};
 
-		if ( defined $Param{Action} && $Param{Action} eq 'Edit' ) {
+		if ( defined $Param{Action} && ($Param{Action} eq 'Edit' || $Param{Action} eq 'Copy') ) {
 
 			# get used fields by the activity dialog
 			my %AssignedFields;
@@ -589,7 +607,7 @@ sub Run {
 	# ------------------------------------------------------------ #
 	# add action
 	# ------------------------------------------------------------ #
-	elsif ( $Self->{Subaction} eq 'AddAction' ) {
+	elsif ( $Self->{Subaction} eq 'AddAction' || $Self->{Subaction} eq 'CopyAction' ) {
 		my $FormsData = $Param{FormsData} || {};
 
 		# challenge token check for write action
@@ -676,7 +694,7 @@ sub Run {
 		# localize available fields
 		my %AvailableFields = %{$AvailableFieldsList};
 
-		if ( defined $Param{Action} && $Param{Action} eq 'Edit' ) {
+		if ( defined $Param{Action} && ($Param{Action} eq 'Edit' || $Param{Action} eq 'Copy') ) {
             # get used fields by the activity dialog
             my %AssignedFields;
 
@@ -1026,6 +1044,10 @@ sub _Edit {
         Class        => 'Modernize',
     );
 
+    if ( defined $Param{Action} && ($Param{Action} eq 'Copy') ) {
+        delete $Param{ID};
+    }
+
 	
 
     $LayoutObject->Block(
@@ -1104,7 +1126,7 @@ sub _Edit {
     # localize available fields
     my %AvailableFields = %{$AvailableFieldsList};
 
-    if ( defined $Param{Action} && $Param{Action} eq 'Edit' ) {
+    if ( defined $Param{Action} && ($Param{Action} eq 'Edit' || $Param{Action} eq 'Copy') ) {
 
         # get used fields by the activity dialog
         my %AssignedFields;

@@ -26,6 +26,7 @@ sub Data {
     $Self->{Translation}->{'Ticket Type'} = 'Tipo de Chamado';
     $Self->{Translation}->{'Custom Form for this Service'} = 'Formulário customizado para este Serviço';
     $Self->{Translation}->{'Create custom Forms for your services.'} = 'Crie formulários customizados para seus serviços.';
+    $Self->{Translation}->{'COPY'} = 'COPIAR';
 
     return;
 }

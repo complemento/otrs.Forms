@@ -67,6 +67,7 @@
                             <th>[% Translate("Type") | html %]</th>
                             <th>[% Translate("frontend") | html %]</th>
                             <th>[% Translate("Delete") | html %]</th>
+                            <th>[% Translate("Copy") | html %]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -90,14 +91,20 @@
                             <td>[% Translate(Data.Valid) | html %]</td>
                             <td>[% Data.ChangeTime | Localize("TimeShort") %]</td>
                             <td>[% Data.CreateTime | Localize("TimeShort") %]</td>
-			    <td title="[% Data.Subject | html %]">[% Data.Subject | truncate(26) | html %]</td>
-			    <td title="[% Data.Body | html %]">[% Data.Body | truncate(26) | html %]</td>
-			    <td title="[% Data.Type | html %]">[% Data.Type | truncate(26) | html %]</td>
-			    <td title="[% Data.Frontend | html %]">[% Data.Frontend | truncate(26) | html %]</td>
+			                <td title="[% Data.Subject | html %]">[% Data.Subject | truncate(26) | html %]</td>
+			                <td title="[% Data.Body | html %]">[% Data.Body | truncate(26) | html %]</td>
+			                <td title="[% Data.Type | html %]">[% Data.Type | truncate(26) | html %]</td>
+			                <td title="[% Data.Frontend | html %]">[% Data.Frontend | truncate(26) | html %]</td>
                             <td class="Center">
                                 <a class="TrashCan DFSDelete" href="[% Env("Baselink") %]Action=[% Env("Action") %];Subaction=Delete;ID=[% Data.ID | uri %];[% Env("ChallengeTokenParam") | html %]" title="[% Translate("Delete this entry") | html %]"><i class="fa fa-trash-o"></i>
 
                                     [% Translate("Delete this entry") | html %]
+                                </a>
+                            </td>
+                            <td class="Center">
+                                <a href="[% Env("Baselink") %]Action=[% Env("Action") %];Subaction=Copy;ID=[% Data.ID | uri %]" title="[% Translate("Copy this entry") | html %]">
+
+                                    [% Translate("COPY") | html %]
                                 </a>
                             </td>
                         </tr>
