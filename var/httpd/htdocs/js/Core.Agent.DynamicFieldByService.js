@@ -10,6 +10,7 @@
 var Core = Core || {};
 Core.Agent = Core.Agent || {};
 Core.Agent.DynamicFieldByServicePreLoad = {};
+Core.Agent.DynamicFieldByServiceLastFocus = null;
 Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 	/**
@@ -532,8 +533,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							//                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No such element id: " + $ElementToUpdate.attr('id') + " in page!", 'CommunicationError'));
 							$('#AJAXLoader').addClass('Hidden');
 						}
+						if (Core.Agent.DynamicFieldByServiceLastFocus) {
+							$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus();
+						}
 					}, 'html');
-
 				// }
 				// else {
 				// 	$('.AddDFS').each(function(){
@@ -559,6 +562,9 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 				// }
 
 				return false;
+			}).bind('focus',function(e) {
+				if (e.target.attributes.getNamedItem('role') === null)
+					Core.Agent.DynamicFieldByServiceLastFocus = e.target.id;
 			}).attr('data-ligeroform', 'ok');
 			// Incluimos o atributo data-ligeroform acima para evitar loop no bind change do objeto
 		});
