@@ -82,16 +82,18 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							}
 
 							// Get form values before dynamic field update
-							$(Response).find('.AddDFS').each(function() {
-								var dfsID = $(this).attr('id');
-								$('#' + dfsID).not('.AddDFS').each(function() {
-									Core.Agent.DynamicFieldByServicePreLoad[ dfsID ] = {
-										value: $(this).val(),
-										attr:  $(this).attr('class')
-									};
-									$(this).parent().parent().remove();
+							try {
+								$(Response).find('.AddDFS').each(function() {
+									var dfsID = $(this).attr('id');
+									$('#' + dfsID).not('.AddDFS').each(function() {
+										Core.Agent.DynamicFieldByServicePreLoad[ dfsID ] = {
+											value: $(this).val(),
+											attr:  $(this).attr('class')
+										};
+										$(this).parent().parent().remove();
+									});
 								});
-							});
+							} catch(e) {}
 							Core.Agent.DynamicFieldByServicePreLoad[ 'Message' ] = {
 								value: $('#RichText').val()
 							};
@@ -113,7 +115,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 										if (key === "Message" && val.trim().length) {
 											setTimeout( function() {
 												window.CKEDITOR.instances['RichText'].setData(val);
-											}, 1000);
+											}, 5000);
 											reloadFields += "" + key + ",";
 										} else if (key === "HideArticle" && val === '1') {
 											$('#Subject').parent().hide();
@@ -213,7 +215,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									if (oKey == 'Message' && oObj.value.length) {
 										setTimeout( function() {
 											window.CKEDITOR.instances['RichText'].setData( oObj.value );
-										}, 1000);
+										}, 5000);
 									} else {
 										$( '#' + oKey ).val( oObj.value ).attr('class',oObj.attr);
 									}
@@ -387,7 +389,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									if (key === "Message") {
 										setTimeout( function() {
 											window.CKEDITOR.instances['RichText'].setData(val);
-										},1000);
+										},5000);
 										reloadFields += "" + key + ",";
 									} else if (key === "AgentFieldConfig") {
 										AgentFieldConfigInsert = "" + val + "";
