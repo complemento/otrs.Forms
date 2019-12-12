@@ -358,6 +358,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 				// show loader icon
 				$('#AJAXLoader').removeClass('Hidden');
 				// get new ActivityDialog content
+				var uploadFields = {};
 				Core.AJAX.FunctionCall(
 					Core.Config.Get('CGIHandle'),
 					QueryString,
@@ -369,6 +370,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						// Aqui limpamos os campos, então esta não é a ideia aqui
 						$('.AddDFS').each(function () {
 							var $that = $(this);
+							if ($that.is(':file'))
+								uploadFields[ $that.attr('id') ] = $that.clone();
 							$($that).parent().parent().remove();
 						});
 
@@ -420,6 +423,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							JavaScriptString = '',
 							ErrorMessage;
 
+
+						Object.keys( uploadFields ).forEach( function(i,v) {
+							$("#"+i).replaceWith( uploadFields[i] );
+						});
 
 						////////////////////////////////////////////////////////
 						Core.UI.InputFields.Deactivate();
