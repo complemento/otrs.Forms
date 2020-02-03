@@ -24,7 +24,12 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		var arrayJSON;
 		var objectJSON;
 
+		// Store the fields which were load by Service Forms
+		// Used for several functions bellow
 		var reloadFields = "";
+
+		// First load of CustomerTicketMessage, when user is coming from Ligero Catalog navigation
+		// This will trigger Service change in order to load service specific fields
 		if ($('[data-ligeroform=ok]').length == 0 && $("[name=Action]").val() == "CustomerTicketMessage" && $("#ServiceID").val() != "") {
 			setTimeout(function () {
 				$('#ServiceID').trigger("change");
@@ -33,46 +38,35 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		// Monitora a mudança do campo Serviço e dos campos dinamicos
 		$("#ServiceID[data-ligeroform!='ok']").each(function () {
 			$(this).bind('change', function () {
-				var formID = "";
-				$("form").each(function () {
-					if ($(this).attr("name") == "compose") {
-						formID = $(this).attr("id");
-					}
-
-				});
-				var Data = {
-					Action: 'DynamicFieldByService',
-					Subaction: 'DisplayActivityDialogAJAX',
-					ServiceDynamicID: $('#ServiceID').val(),
-					InterfaceName: formID,
-					IsAjaxRequest: 1,
-					IsMainWindow: 1
-				};
-				if ($('#IsProcessEnroll').val() !== 'undefined' && $('#IsProcessEnroll').val() === '1') {
-					$.extend(Data, {
-						IsMainWindow: 1,
-						IsProcessEnroll: 1,
-						TicketID: $('#TicketID').val()
-					});
-				}
 				if ($('#ServiceID').val()) {
+					var formID = "";
+					$("form").each(function () {
+						if ($(this).attr("name") == "compose") {
+							formID = $(this).attr("id");
+						}
+	
+					});
+					var Data = {
+						Action: 'DynamicFieldByService',
+						Subaction: 'DisplayActivityDialogAJAX',
+						ServiceDynamicID: $('#ServiceID').val(),
+						// @TODO: remove InterfaceName cascade (from .pm)
+						InterfaceName: 'xxxxxxxxxxxxxxxxxxxxxxx',
+						// InterfaceName: formID,
+						IsAjaxRequest: 1,
+						IsMainWindow: 1
+					};
+
+					// Remove Form fields from last selected service
+					// @TODO: create a specific function to clean last selected service form fields
 					$('.AddDFS').each(function () {
 						var $that = $(this);
 						$($that).parent().parent().fadeOut(400, function () {
 							$($that).parent().parent().empty();
 						});
 					});
-					// remove the content of the activity dialog
-					$('#ActivityDialogContent').empty();
 
-					// fade out the empty container so it will fade in again on processes change
-					// is not recommended to empty after fade out at this point since the transition offect
-					// will not look so nice
-					$('#ActivityDialogContent').fadeOut('fast');
-
-					// show loader icon
-					$('#AJAXLoader').removeClass('Hidden');
-					// get new ActivityDialog content
+					// get new Service Form content
 					Core.AJAX.FunctionCall(
 						Core.Config.Get('CGIHandle'),
 						Data,
@@ -82,6 +76,9 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							}
 
 							// Get form values before dynamic field update
+							// This is useful when new fields are added from ACLs and
+							// we need to recreate the form and replace fields tha were already 
+							// in the screen
 							try {
 								$(Response).find('.AddDFS').each(function() {
 									var dfsID = $(this).attr('id');
@@ -99,23 +96,35 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							};
 
 							var res = Response.split(':$$:Add:$$:');
-							//LOOP QUE PEGA OS VALORES E OS NOMES 
+							
+							// Response receives the HTML to be loaded
 							Response = res[0];
-							var i;
+
+							// arrayJSON  receives the default values of service forms fields
 							arrayJSON = res[1].split('@%@%@');
-							objectJSON;
+
+							var i;
 							reloadFields = "";
 							var AgentFieldConfigInsert = ".SpacingTop:first";
 							var CustomerFieldConfigInsert = "#BottomActionRow";
-							//var valObj = ["Dest","StateID","SLAID","TypeID"];
+
+							// Set default values for the Service Form fields,
+							// before adding them to the DOM. Also add fields to reloadFields
+							// variable
 							for (i = 0; i < arrayJSON.length; i++) {
 								objectJSON = $.parseJSON(arrayJSON[i]);
 								$.each(objectJSON, function (key, val) {
 									if (key && val) {
 										if (key === "Message" && val.trim().length) {
-											setTimeout( function() {
+											window.CKEDITOR.instances['RichText'].on('instanceReady', function() { 
 												window.CKEDITOR.instances['RichText'].setData(val);
-											}, 5000);
+											});
+											// @TODO: check if instances is already ready instead of
+											// just triggering the funciton bellow.
+											// The following line is needed because when the service is changed
+											// the code above is not triggered since 'instanceReady' will not be
+											// triggered again.
+											window.CKEDITOR.instances['RichText'].setData(val);
 											reloadFields += "" + key + ",";
 										} else if (key === "HideArticle" && val === '1') {
 											$('#Subject').parent().hide();
@@ -126,11 +135,17 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 										} else if ($('#' + key).length > 0) {
 											reloadFields += "" + key + ",";
 											$('#' + key).val(val);
+
+											// Refreshs the DOM in order to certify Modernize
+											// recognizes the default value of the field
+											// @TODO: check if it's needed since those functions
+											// are already called bellow without context
 											Core.UI.InputFields.Deactivate($('#' + key));
 											Core.UI.InputFields.Activate($('#' + key));
 
 										}
 										if (key === "CustomerFieldConfig") {
+											// Change the form placement default selector
 											CustomerFieldConfigInsert = "" + val + "";
 										}
 									}
@@ -138,7 +153,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								});
 							}
 							reloadFields = reloadFields.substring(0, reloadFields.length - 1);
-							//Core.AJAX.FormUpdate($('#'+formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
+
+							// Takes the placement for the fields
 							var FieldConfigInsert = "";
 							if (formID === "NewCustomerTicket") {
 								FieldConfigInsert = CustomerFieldConfigInsert;
@@ -146,18 +162,17 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								FieldConfigInsert = AgentFieldConfigInsert;
 							}
 
-							var $ElementToUpdate = $(Response).insertBefore(FieldConfigInsert),
-								JavaScriptString = '',
-								ErrorMessage;
+							var $ElementToUpdate = $(Response).insertBefore(FieldConfigInsert);
+
+							var JavaScriptString = '';
+							var ErrorMessage;
 
 
 							////////////////////////////////////////////////////////
 							Core.UI.InputFields.Deactivate();
 							Core.UI.InputFields.Activate();
 							//////////////////////////////////////////////////
-							if (!Response) {
-								$('#AJAXLoader').addClass('Hidden');
-							} else if ($ElementToUpdate && isJQueryObject($ElementToUpdate) && $ElementToUpdate.length) {
+							if ($ElementToUpdate && isJQueryObject($ElementToUpdate) && $ElementToUpdate.length) {
 								$ElementToUpdate.find('script').each(function () {
 									JavaScriptString += $(this).html();
 									$(this).remove();
@@ -176,6 +191,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 								// Handle special server errors (Response = <div class="ServerError" data-message="Message"></div>)
 								// Check if first element has class 'ServerError'
+								// @TODO: Complemento: probably error messages are not working ok on Service Forms,
+								// 		  since we don't have ProcessEntityIDServerError on DOM
 								if ($ElementToUpdate.children().first().hasClass('ServerError')) {
 									ErrorMessage = $ElementToUpdate.children().first().data('message');
 
@@ -211,23 +228,31 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								$('#AJAXDialog').val('1');
 
 								// Set pre loaded field values
+								// TODO: Put this block above together with other data processing, before
+								// adding the fields to the DOM
 								jQuery.each( Core.Agent.DynamicFieldByServicePreLoad, function( oKey, oObj ) {
 									if (oKey == 'Message' && oObj.value.length) {
-										setTimeout( function() {
-											window.CKEDITOR.instances['RichText'].setData( oObj.value );
-										}, 5000);
+										window.CKEDITOR.instances['RichText'].on('instanceReady', function() { 
+											window.CKEDITOR.instances['RichText'].setData(oObj.value);
+										});
+										// @TODO: check if instances is already ready instead of
+										// just triggering the funciton bellow.
+										// The following line is needed because when the service is changed
+										// the code above is not triggered since 'instanceReady' will not be
+										// triggered again.
+										window.CKEDITOR.instances['RichText'].setData(oObj.value);
 									} else {
 										$( '#' + oKey ).val( oObj.value ).attr('class',oObj.attr);
 									}
 								});
 								Core.Agent.DynamicFieldByServicePreLoad = {};
 
+								// Add change event listener on each of those fields, in order to trigger 
+								// FormUpdate (probably to process ACLs)
 								$(".AddDFS").each(function () {
-
 									if ($(this).hasClass('DateSelection') || $(this).hasClass('Validate_MaxLength')) {
 										return true;
 									}
-
 									var formId = {};
 									var id = $(this).attr('id');
 
@@ -252,7 +277,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									var index = ids.indexOf('FileUpload');
 									if (index !== -1) ids.splice(index, 1);
 
-
 									$('#' + id).bind('change', function (Event) {
 										Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id, ids);
 									});
@@ -263,16 +287,14 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 										}
 									});
 								});
-
-								Core.Agent.DynamicFieldByService.Init();
-
-
+								// Core.Agent.DynamicFieldByService.Init();
 							} else {
 								$('#AJAXLoader').addClass('Hidden');
 							}
 						}, 'html');
 
 				} else {
+					// If no service was selected, then clean Form Fields from the last selected service
 					$('.AddDFS').each(function () {
 						var $that = $(this);
 						$($that).parent().parent().fadeOut(400, function () {
@@ -287,7 +309,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						} else if ($('#' + arrayFieldsClean[i]).length > 0) {
 							$('#' + arrayFieldsClean[i]).val('');
 						}
-
 					}
 
 					Core.AJAX.FormUpdate($('#' + formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
@@ -302,6 +323,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 			// Incluimos o atributo data-ligeroform acima para evitar loop no bind change do objeto
 		});
 
+
+//// ======================================== breaking point ================================================================
 		// Alteração de outros campos que não seja, o campo serviço! #################################################################################
 		// Campos Dinamicos
 		$("[id^='DynamicField_'][data-ligeroform!='ok']").each(function () {
@@ -322,7 +345,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 				Data.ChallengeToken = Core.Config.Get('ChallengeToken');
 				Data.Action = 'DynamicFieldByService';
 				Data.Subaction = 'HideAndShowDynamicFields';
-				// ServiceDynamicID: $('#ServiceID').val(),
 				Data.InterfaceName = formID;
 				Data.IsAjaxRequest = 1;
 				Data.IsMainWindow = 1;
@@ -331,29 +353,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 					QueryString += ';' + encodeURIComponent(Key) + '=' + encodeURIComponent(Value);
 				});
 				QueryString = Core.AJAX.SerializeForm($('#' + formID), Data) + QueryString;
-
-				if ($('#IsProcessEnroll').val() !== 'undefined' && $('#IsProcessEnroll').val() === '1') {
-					$.extend(Data, {
-						IsMainWindow: 1,
-						IsProcessEnroll: 1,
-						TicketID: $('#TicketID').val()
-					});
-				}
-				// if ($('#ServiceID').val()) {
-				// Aqui limpamos os campos, então esta não é a ideia aqui
-				// $('.AddDFS').each(function(){
-				// 	var $that =  $(this);
-				// 		$($that).parent().parent().fadeOut(400, function() {
-				// 				$($that).parent().parent().empty();
-				// 	});
-				// });
-				// remove the content of the activity dialog
-				// $('#ActivityDialogContent').empty();
-
-				// fade out the empty container so it will fade in again on processes change
-				// is not recommended to empty after fade out at this point since the transition offect
-				// will not look so nice
-				// $('#ActivityDialogContent').fadeOut('fast');
 
 				// show loader icon
 				$('#AJAXLoader').removeClass('Hidden');
@@ -366,8 +365,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						if (Response == 0) {
 							return;
 						}
-
-						// Aqui limpamos os campos, então esta não é a ideia aqui
 						$('.AddDFS').each(function () {
 							var $that = $(this);
 							if ($that.is(':file'))
@@ -534,42 +531,14 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									}
 								});
 							});
-
-							Core.Agent.DynamicFieldByService.Init();
-
-
+							// Core.Agent.DynamicFieldByService.Init();
 						} else {
-							//                        Core.Exception.HandleFinalError(new Core.Exception.ApplicationError("No such element id: " + $ElementToUpdate.attr('id') + " in page!", 'CommunicationError'));
 							$('#AJAXLoader').addClass('Hidden');
 						}
 						if (Core.Agent.DynamicFieldByServiceLastFocus) {
 							$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus();
 						}
 					}, 'html');
-				// }
-				// else {
-				// 	$('.AddDFS').each(function(){
-				// 		var $that =  $(this);
-				// 			$($that).parent().parent().fadeOut(400, function() {
-				// 				   $($that).parent().parent().empty();
-				// 		});
-				// 	});
-				// 	var arrayFieldsClean = reloadFields.split(',');
-				// 	var i;
-				// 	for( i=0; i < arrayFieldsClean.length; i++){
-				// 		if(arrayFieldsClean[i] === "Message"){
-				// 			window.CKEDITOR.instances['RichText'].setData('');
-				// 		}
-				// 		else if($('#'+ arrayFieldsClean[i]).length > 0){
-				// 			 $('#'+arrayFieldsClean[i]).val('');	
-				// 		}
-
-				// 	}
-
-				// 		Core.AJAX.FormUpdate($('#'+formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
-
-				// }
-
 				return false;
 			}).bind('focus',function(e) {
 				if (e.target.attributes.getNamedItem('role') === null)
