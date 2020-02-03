@@ -378,7 +378,7 @@ sub GetDynamicFieldByServiceAndInterface {
 			}
 		} 
 	
-		my $Config = '';
+		my $Config = { HideArticle => 0 };
 		if ($Data[13] ){
     		$Config = $YAMLObject->Load( Data => $Data[13] );
 		}
@@ -460,7 +460,7 @@ sub GetDynamicFieldByService {
 			ID => $Data[10],
 		) if $Data[10];
 
-		my $Config = '';
+		my $Config = { HideArticle => 0 };
 		if ($Data[13] ){
 			$Config = $YAMLObject->Load( Data => $Data[13] );
 		}

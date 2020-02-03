@@ -82,16 +82,18 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							}
 
 							// Get form values before dynamic field update
-							$(Response).find('.AddDFS').each(function() {
-								var dfsID = $(this).attr('id');
-								$('#' + dfsID).not('.AddDFS').each(function() {
-									Core.Agent.DynamicFieldByServicePreLoad[ dfsID ] = {
-										value: $(this).val(),
-										attr:  $(this).attr('class')
-									};
-									$(this).parent().parent().remove();
+							try {
+								$(Response).find('.AddDFS').each(function() {
+									var dfsID = $(this).attr('id');
+									$('#' + dfsID).not('.AddDFS').each(function() {
+										Core.Agent.DynamicFieldByServicePreLoad[ dfsID ] = {
+											value: $(this).val(),
+											attr:  $(this).attr('class')
+										};
+										$(this).parent().parent().remove();
+									});
 								});
-							});
+							} catch(e) {}
 							Core.Agent.DynamicFieldByServicePreLoad[ 'Message' ] = {
 								value: $('#RichText').val()
 							};
@@ -113,7 +115,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 										if (key === "Message" && val.trim().length) {
 											setTimeout( function() {
 												window.CKEDITOR.instances['RichText'].setData(val);
-											}, 1000);
+											}, 5000);
 											reloadFields += "" + key + ",";
 										} else if (key === "HideArticle" && val === '1') {
 											$('#Subject').parent().hide();
@@ -213,7 +215,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									if (oKey == 'Message' && oObj.value.length) {
 										setTimeout( function() {
 											window.CKEDITOR.instances['RichText'].setData( oObj.value );
-										}, 1000);
+										}, 5000);
 									} else {
 										$( '#' + oKey ).val( oObj.value ).attr('class',oObj.attr);
 									}
@@ -356,6 +358,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 				// show loader icon
 				$('#AJAXLoader').removeClass('Hidden');
 				// get new ActivityDialog content
+				var uploadFields = {};
 				Core.AJAX.FunctionCall(
 					Core.Config.Get('CGIHandle'),
 					QueryString,
@@ -367,6 +370,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						// Aqui limpamos os campos, então esta não é a ideia aqui
 						$('.AddDFS').each(function () {
 							var $that = $(this);
+							if ($that.is(':file'))
+								uploadFields[ $that.attr('id') ] = $that.clone();
 							$($that).parent().parent().remove();
 						});
 
@@ -387,7 +392,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									if (key === "Message") {
 										setTimeout( function() {
 											window.CKEDITOR.instances['RichText'].setData(val);
-										},1000);
+										},5000);
 										reloadFields += "" + key + ",";
 									} else if (key === "AgentFieldConfig") {
 										AgentFieldConfigInsert = "" + val + "";
@@ -418,6 +423,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							JavaScriptString = '',
 							ErrorMessage;
 
+
+						Object.keys( uploadFields ).forEach( function(i,v) {
+							$("#"+i).replaceWith( uploadFields[i] );
+						});
 
 						////////////////////////////////////////////////////////
 						Core.UI.InputFields.Deactivate();

@@ -3646,6 +3646,7 @@ sub _GetParam {
     # get config object
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
+
     DIALOGFIELD:
     for my $CurrentField ( @{ $ActivityDialog->{FieldOrder} } ) {
         # Skip if we're working on a field that was already done with or without ID
