@@ -246,7 +246,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								//
 								// Visual effects
 								//
-								$ElementToUpdate.fadeIn();
+								//$ElementToUpdate.fadeIn();
 								Core.UI.InputFields.Activate($ElementToUpdate);
 
 								//
@@ -306,7 +306,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								//
 								// Bind change events for new fields in order to trigger form update
 								//
-								$(".AddDFS").each(function () {
+								$(".AddDFS").not('.RemoveDFS').each(function () {
 
 									// Ignore some fields
 									if ($(this).hasClass('DateSelection') || $(this).hasClass('Validate_MaxLength'))
@@ -341,12 +341,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									if (index !== -1) ids.splice(index, 1);
 
 									//
-									// Bind field change event
+									// Trigger field update event
 									//
 									var id = $(this).attr('id');
-									$('#' + id).bind('change', function (Event) {
-										Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id, ids);
-									});
+									Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id, ids);
 
 									//
 									// Bind event to restore TreeView for Dynamic Fields on FormUpdates
@@ -420,10 +418,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		var cleanOldLigeroFormFields = function() {
 			$('.AddDFS').each(function () {
 				var $that = $(this);
-				$($that).parent().parent().fadeOut(400, function () {
-					$($that).parent().parent().empty();
-				});
-			});
+				setTimeout( function() {
+					$that.parents('.Row').remove();
+				},100);
+			}).addClass('RemoveDFS');
 		};
 
 		//
