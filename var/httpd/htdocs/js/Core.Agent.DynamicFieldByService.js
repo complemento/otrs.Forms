@@ -11,6 +11,7 @@ var Core = Core || {};
 Core.Agent = Core.Agent || {};
 Core.Agent.DynamicFieldByServicePreLoad = {};
 Core.Agent.DynamicFieldByServiceLastFocus = null;
+Core.Agent.DynamicFieldByServiceLastChangedElement = null;
 Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 	/**
@@ -87,11 +88,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						});
 						Data = Core.AJAX.SerializeForm($('#' + formID), Data) + QueryString;
 					}
-
-					//
-					// Remove Form fields from last selected service
-					//
-					cleanOldLigeroFormFields();
 
 					//
 					// Request form content
@@ -200,6 +196,11 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								FieldConfigInsert = CustomerFieldConfigInsert;
 							else
 								FieldConfigInsert = AgentFieldConfigInsert;
+
+							//
+							// Remove Form fields from last selected service
+							//
+							cleanOldLigeroFormFields();
 
 							//
 							// Insert fields on DOM and restore form fields
@@ -344,7 +345,12 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									// Trigger field update event
 									//
 									var id = $(this).attr('id');
-									Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id, ids);
+									$("#" + id).bind('change',function(e) {
+										Core.Agent.DynamicFieldByServiceLastChangedElement = id;
+									});
+									if(Core.Agent.DynamicFieldByServiceLastChangedElement == id){
+										Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id, ids);
+									}
 
 									//
 									// Bind event to restore TreeView for Dynamic Fields on FormUpdates
@@ -374,6 +380,24 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								$(this)
 									.bind('change', checkLigeroForms('HideAndShowDynamicFields'))
 									.bind('focus',  storeLigeroFormLastFocus)
+									.bind(
+										// Keydown handler for tree list
+										'keydown', function (Event) {
+											var $HoveredNode;
+											switch (Event.which) {
+												// Tab
+												// Find correct input, if element is selected in dropdown and tab key is used
+												case $.ui.keyCode.TAB:
+													if (Event.shiftKey) {
+														// Core.UI.InputFields.FocusPreviousElement($SearchObj);
+													}
+													else {
+														// FocusNextElement($SearchObj);
+													}
+													break;
+											}
+										} 
+									)
 									.attr('data-ligeroform', 'ok');
 							});
 
@@ -418,9 +442,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		var cleanOldLigeroFormFields = function() {
 			$('.AddDFS').each(function () {
 				var $that = $(this);
-				setTimeout( function() {
-					$that.parents('.Row').remove();
-				},100);
+				$that.parents('.Row').remove();
 			}).addClass('RemoveDFS');
 		};
 
@@ -428,7 +450,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		// Store last focused field
 		//
 		var storeLigeroFormLastFocus = function(e) {
-			if (e.target.attributes.getNamedItem('role') === null)
+			console.log(e.target.id);
+			// if (e.target.attributes.getNamedItem('role') === null)
 				Core.Agent.DynamicFieldByServiceLastFocus = e.target.id;
 		};
 
