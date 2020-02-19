@@ -370,8 +370,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							//
 							// Restore last focused field
 							//
-							if (Core.Agent.DynamicFieldByServiceLastFocus)
+							if (Core.Agent.DynamicFieldByServiceLastFocus) {
+								$('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select')).parent().parent().remove();
 								$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus();
+							}
 
 							//
 							// Bind change events on dynamic fields in order to check ACLs
@@ -380,7 +382,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								$(this)
 									.bind('change', checkLigeroForms('HideAndShowDynamicFields'))
 									.bind('focus',  storeLigeroFormLastFocus)
-									.bind(
+									/*.bind(
 										// Keydown handler for tree list
 										'keydown', function (Event) {
 											var $HoveredNode;
@@ -397,7 +399,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 													break;
 											}
 										} 
-									)
+									)*/
 									.attr('data-ligeroform', 'ok');
 							});
 
@@ -450,9 +452,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		// Store last focused field
 		//
 		var storeLigeroFormLastFocus = function(e) {
-			console.log(e.target.id);
-			// if (e.target.attributes.getNamedItem('role') === null)
-				Core.Agent.DynamicFieldByServiceLastFocus = e.target.id;
+			Core.Agent.DynamicFieldByServiceLastFocus = e.target.id;
 		};
 
 		//
