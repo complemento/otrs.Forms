@@ -371,7 +371,12 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							// Restore last focused field
 							//
 							if (Core.Agent.DynamicFieldByServiceLastFocus) {
-								$('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select')).parent().parent().remove();
+								var prevEl = $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select'));
+								if (prevEl.hasClass('jstree')) {
+									prevEl.parent().parent().remove();
+								}
+								//var t = $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select'));
+								//$('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select')).parent().parent().remove();
 								$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus();
 							}
 
