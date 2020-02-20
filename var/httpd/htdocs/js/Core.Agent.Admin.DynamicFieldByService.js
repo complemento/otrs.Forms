@@ -1099,6 +1099,7 @@ Core.Agent.Admin.AddDynamicFieldByService = (function (TargetNS) {
                              FieldConfigElement.DescriptionLong = $('#DescLong').val();
                              FieldConfigElement.DefaultValue = $('#DefaultValue').val();
                              FieldConfigElement.Display = $('#Display').val();
+                             
 
                              if (Fieldname === 'Article') {
                                  if (typeof FieldConfigElement.Config === 'undefined'){
@@ -1185,6 +1186,8 @@ Core.Agent.Admin.AddDynamicFieldByService = (function (TargetNS) {
             else {
                 $('#ArticleTypeContainer').addClass('Hidden');
             }
+            // Reload Display field DOM
+            $('#Display').trigger('redraw.InputField');
 
             Core.UI.InputFields.Activate($('.Dialog'));
 
