@@ -498,14 +498,14 @@ sub Run {
 
 		    FIELD:
 		    for my $FieldName ( @{ $GetParam{Fields} } ) {
-			next FIELD if !$FieldName;
-			next FIELD if !$AvailableFieldsList->{$FieldName};
+                next FIELD if !$FieldName;
+                next FIELD if !$AvailableFieldsList->{$FieldName};
 
-			# set fields hash
-			$FormsData->{Config}->{Fields}->{$FieldName} = {};
+                # set fields hash
+                $FormsData->{Config}->{Fields}->{$FieldName} = {};
 
-			# set field order array
-			push @{ $FormsData->{Config}->{FieldOrder} }, $FieldName;
+                # set field order array
+                push @{ $FormsData->{Config}->{FieldOrder} }, $FieldName;
 		    }
 		}
 
@@ -4538,7 +4538,7 @@ sub _OutputShowHideDynamicFields {
             } else {
                 # Se não tem ordem definida no form, sua ordem é a ordem do último
                 # campo ordenado do formulário + sua ordem no FieldsOrder geral
-                $index = "$DynamicField->{FieldOrder}";
+                $index = $LastFieldOrder+"0.$DynamicField->{FieldOrder}";
             }
             $FieldsOrder{"$index"} = $DynamicField;
         }
@@ -4553,15 +4553,6 @@ sub _OutputShowHideDynamicFields {
 	%ErrorMessages = %{ $Param{ErrorMessages} } if ( IsHashRefWithData( $Param{ErrorMessages} ) );
 
     my $AJAXUpdatableFields;
-
-    my @data = keys %FieldsOrder;
-    my @sorted =
-        map { $_->[0] }
-        sort { $a->[1] <=> $b->[1] or $a->[2] <=> $b->[2]  }
-        map {
-        my @l = split(/\./);
-        [$_, length($l[1]), $l[1]] }
-        @data;
 
     for my $Field (sort { $a <=> $b } keys %FieldsOrder){
         my $DynamicFieldName = $FieldsOrder{$Field}->{Name};

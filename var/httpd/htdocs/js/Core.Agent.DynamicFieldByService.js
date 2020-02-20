@@ -375,8 +375,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								if (prevEl.hasClass('jstree')) {
 									prevEl.parent().parent().remove();
 								}
+								// @TODO: fix focus continue on TAB key mainly in Dropdown fields
 								//var t = $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select'));
 								//$('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select')).parent().parent().remove();
+								// console.log($('#' + Core.Agent.DynamicFieldByServiceLastFocus));
 								$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus();
 							}
 
