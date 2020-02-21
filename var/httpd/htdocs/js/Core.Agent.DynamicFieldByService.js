@@ -4,7 +4,6 @@
 // the enclosed file COPYING for license information (AGPL). If you
 // did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 // --
-
 "use strict";
 
 var Core = Core || {};
@@ -22,22 +21,14 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 	 *      This function initializes the special module functions.
 	 */
 	TargetNS.Init = function () {
-		//
 		// Aux variables to control form flow
-		//
 		var arrayJSON;
 		var objectJSON;
 		var reloadFields = "";
 		var uploadFields = {};
 
-		//
 		// Trigger service change event in order to auto load form definitions for the given Service ID
-		//
-		if ($('[data-ligeroform=ok]').length == 0 && $("[name=Action]").val() == "CustomerTicketMessage" && $("#ServiceID").val() != "") {
-			setTimeout(function () {
-				$('#ServiceID').trigger("change");
-			}, 1);
-		}
+		$('#ServiceID').trigger("change");
 
 		//
 		// Function responsible to monitor Ligero Forms fields 
@@ -80,7 +71,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 					//
 					// If ACL check, use a different POST format
-					//
 					if (webAction == 'HideAndShowDynamicFields') {
 						var QueryString = '';
 						$.each(Data, function (Key, Value) {
@@ -140,7 +130,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							// Define some local variables in order to insert the form fields inside de DOM
 							//
 							var i;
-							reloadFields                  = "";
+							reloadFields              = "";
 							var AgentFieldConfigInsert    = ".SpacingTop:first";
 							var CustomerFieldConfigInsert = "#BottomActionRow";
 
@@ -180,8 +170,9 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 											//Core.UI.InputFields.Deactivate($('#' + key));
 											//Core.UI.InputFields.Activate($('#' + key));
 										}
-										if (key === "CustomerFieldConfig") 
+										if (key === "CustomerFieldConfig") {
 											CustomerFieldConfigInsert = "" + val + "";
+										}
 									}
 
 								});
@@ -370,16 +361,18 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							//
 							// Restore last focused field
 							//
+							
 							if (Core.Agent.DynamicFieldByServiceLastFocus) {
 								var prevEl = $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select'));
 								if (prevEl.hasClass('jstree')) {
 									prevEl.parent().parent().remove();
 								}
 								// @TODO: fix focus continue on TAB key mainly in Dropdown fields
-								//var t = $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select'));
-								//$('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select')).parent().parent().remove();
-								// console.log($('#' + Core.Agent.DynamicFieldByServiceLastFocus));
-								$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus();
+								// The best way to not trigger modernize focus, making a weird
+								// options dialog reshow
+								Core.UI.InputFields.Deactivate();
+								$('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','')).focus();
+								Core.UI.InputFields.Activate();
 							}
 
 							//
@@ -389,24 +382,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								$(this)
 									.bind('change', checkLigeroForms('HideAndShowDynamicFields'))
 									.bind('focus',  storeLigeroFormLastFocus)
-									/*.bind(
-										// Keydown handler for tree list
-										'keydown', function (Event) {
-											var $HoveredNode;
-											switch (Event.which) {
-												// Tab
-												// Find correct input, if element is selected in dropdown and tab key is used
-												case $.ui.keyCode.TAB:
-													if (Event.shiftKey) {
-														// Core.UI.InputFields.FocusPreviousElement($SearchObj);
-													}
-													else {
-														// FocusNextElement($SearchObj);
-													}
-													break;
-											}
-										} 
-									)*/
 									.attr('data-ligeroform', 'ok');
 							});
 
@@ -420,25 +395,25 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 					// 
 					// Clean ( possible cached ) data for current fields
-					//
-					var arrayFieldsClean = reloadFields.split(',');
-					var i;
-					for (i = 0; i < arrayFieldsClean.length; i++) {
-						if (arrayFieldsClean[i] === "Message") {
-							window.CKEDITOR.instances['RichText'].setData('');
-						} else if ($('#' + arrayFieldsClean[i]).length > 0) {
-							$('#' + arrayFieldsClean[i]).val('');
+					if(reloadFields.length){
+						var arrayFieldsClean = reloadFields.split(',');
+						var i;
+						for (i = 0; i < arrayFieldsClean.length; i++) {
+							if (arrayFieldsClean[i] === "Message") {
+								window.CKEDITOR.instances['RichText'].setData('');
+							} else if ($('#' + arrayFieldsClean[i]).length > 0) {
+								$('#' + arrayFieldsClean[i]).val('');
+							}
 						}
-					}
-
-					//
-					// Trigger form update events
-					//
-					Core.AJAX.FormUpdate($('#' + formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
-					$('#Subject').parent().show();
-					$('.RichTextHolder').show();
-					$('.DnDUploadBox').parent().parent().show();
-					$('#AJAXLoaderSubject\\,Message').hide();
+						//
+						// Trigger form update events
+						//
+						Core.AJAX.FormUpdate($('#' + formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
+						$('#Subject').parent().show();
+						$('.RichTextHolder').show();
+						$('.DnDUploadBox').parent().parent().show();
+						$('#AJAXLoaderSubject\\,Message').hide();
+						}
 				}
 
 				return false;
@@ -472,6 +447,9 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 				.attr('data-ligeroform', 'ok');
 		});
 	};
+
+	// Register Ligero Forms in the initialization of the Action
+	Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE_LATE');
 
 	return TargetNS;
 }(Core.Agent.DynamicFieldByService || {}));
