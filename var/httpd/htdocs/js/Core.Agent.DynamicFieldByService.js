@@ -1,3 +1,8 @@
+// TODO:
+//		verificar por que focu em search está disparando em loop no elemento
+//		tentar acessar o elemento modernized na conclusão do Ajax 
+//		
+//		OK -TALVEZ FILTRAR O STORE FOCUS PARA NAO FAZER STORE DO JXX_XX_ANCHOR, MAS SIM DE SEU PAI
 // --
 // --
 // This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -35,12 +40,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		//
 		var checkLigeroForms = function(webAction) {
 			return function() {
-
 				//
 				// If Service was defined
 				//
 				if ($('#ServiceID').val()) {
-
 					//
 					// Identify interfaceName ( used to detect which fields will be visible per interface )
 					//
@@ -154,7 +157,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 											//
 											window.CKEDITOR.instances['RichText'].setData(val);
 											reloadFields += "" + key + ",";
-										} else if (key === "HideArticle" && val === '1') {
+										} else if (key === "HideArticle" && val === '1'&& Core.Config.Get('Action').search(/^Customer/)>-1 ) {
 											$('#Subject').parent().hide();
 											$('.RichTextHolder').hide();
 											$('.DnDUploadBox').parent().parent().hide();
@@ -163,12 +166,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 										} else if ($('#' + key).length > 0) {
 											reloadFields += "" + key + ",";
 											$('#' + key).val(val);
-											//
-											// Refreshs the DOM in order to certify Modernize
-											// recognizes the default value of the field
-											//
-											//Core.UI.InputFields.Deactivate($('#' + key));
-											//Core.UI.InputFields.Activate($('#' + key));
 										}
 										if (key === "CustomerFieldConfig") {
 											CustomerFieldConfigInsert = "" + val + "";
@@ -207,6 +204,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							Core.UI.InputFields.Deactivate();
 							Core.UI.InputFields.Activate();
 
+							
 							//
 							// Loop through updated elements to perform the following actions
 							// 
@@ -234,12 +232,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								} catch (Event) {
 									$.noop(Event);
 								}
-
-								//
-								// Visual effects
-								//
-								//$ElementToUpdate.fadeIn();
-								Core.UI.InputFields.Activate($ElementToUpdate);
 
 								//
 								// Handle errors
@@ -352,6 +344,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 										if (Data[FieldName] && $('#' + FieldName).hasClass('DynamicFieldWithTreeView')) {
 											Core.UI.TreeSelection.RestoreDynamicFieldTreeView($('#' + FieldName), Data[FieldName], '', 1);
 										}
+										restoreLastFocus();
 									});
 								});
 							} else {
@@ -361,29 +354,21 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							//
 							// Restore last focused field
 							//
-							
-							if (Core.Agent.DynamicFieldByServiceLastFocus) {
-								var prevEl = $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select'));
-								if (prevEl.hasClass('jstree')) {
-									prevEl.parent().parent().remove();
-								}
-								// @TODO: fix focus continue on TAB key mainly in Dropdown fields
-								// The best way to not trigger modernize focus, making a weird
-								// options dialog reshow
-								Core.UI.InputFields.Deactivate();
-								$('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','')).focus();
-								Core.UI.InputFields.Activate();
-							}
+							restoreLastFocus();
 
-							//
 							// Bind change events on dynamic fields in order to check ACLs
-							//
+							// Exclude Modernized fields search from our filter
+							// $("[id^='DynamicField_'][data-ligeroform!='ok']:not(.InputField_Search)").each(function () {
 							$("[id^='DynamicField_'][data-ligeroform!='ok']").each(function () {
-								$(this)
-									.bind('change', checkLigeroForms('HideAndShowDynamicFields'))
-									.bind('focus',  storeLigeroFormLastFocus)
+									$(this)
+									.bind('change', checkLigeroForms('HideAndShowDynamicFields') )
+									.bind('focus.jstree',  storeLigeroFormLastFocus)
 									.attr('data-ligeroform', 'ok');
 							});
+							// $("[id^='DynamicField_']").each(function () {
+							// 	$(this)
+							// 		.bind('focus.jstree',  storeLigeroFormLastFocus)
+							// });
 
 						}, 'html');
 				} else {
@@ -434,8 +419,43 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		// Store last focused field
 		//
 		var storeLigeroFormLastFocus = function(e) {
-			Core.Agent.DynamicFieldByServiceLastFocus = e.target.id;
+			if(typeof e !== 'undefined' && typeof e.target.id !== 'undefined'){
+				var ModernizeSubelement = /_anchor$/;
+				var NewFocus = ''
+				if(ModernizeSubelement.test(e.target.id)){
+					NewFocus = $('#'+e.target.id).parent().parent().parent().attr('id');
+					NewFocus = NewFocus.replace('_Select','_Search');
+				} else {
+					NewFocus = e.target.id
+				}
+				console.log('FOCO ATUAL: '+NewFocus)
+				Core.Agent.DynamicFieldByServiceLastFocus = NewFocus;
+			}
 		};
+
+		var restoreLastFocus = function(e) {
+			if (Core.Agent.DynamicFieldByServiceLastFocus) {
+							// var prevEl = $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select'));
+							// if (prevEl.hasClass('jstree')) {
+							// 	prevEl.parent().parent().remove();
+							// }
+				// @TODO: fix focus continue on TAB key mainly in Dropdown fields
+				// The best way to not trigger modernize focus, making a weird
+				// options dialog reshow
+				// Core.UI.InputFields.Deactivate();
+				// $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','')).focus();
+				$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus();
+				// Core.UI.InputFields.Activate();
+			};
+		}
+
+		// Sotre the last elements
+		var FormsKey = function(Event){
+			storeLigeroFormLastFocus(Event);
+		};
+		document.addEventListener('keyup', FormsKey, true);
+		document.addEventListener('keydown', FormsKey, true);
+		document.addEventListener('keydpress', FormsKey, true);
 
 		//
 		// Bind event for Service fields

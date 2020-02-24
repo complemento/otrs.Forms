@@ -267,6 +267,7 @@ sub Run {
             ReturnSubType => '-',
             %UserID,
         );
+
         my %AclAction = %PossibleActions;
         if ($ACL) {
             %AclAction = $TicketObject->TicketAclActionData();
