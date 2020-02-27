@@ -1,9 +1,3 @@
-// TODO:
-//		verificar por que focu em search está disparando em loop no elemento
-//		tentar acessar o elemento modernized na conclusão do Ajax 
-//		
-//		OK -TALVEZ FILTRAR O STORE FOCUS PARA NAO FAZER STORE DO JXX_XX_ANCHOR, MAS SIM DE SEU PAI
-// --
 // --
 // This software comes with ABSOLUTELY NO WARRANTY. For details, see
 // the enclosed file COPYING for license information (AGPL). If you
@@ -16,6 +10,7 @@ Core.Agent = Core.Agent || {};
 Core.Agent.DynamicFieldByServicePreLoad = {};
 Core.Agent.DynamicFieldByServiceLastFocus = null;
 Core.Agent.DynamicFieldByServiceLastChangedElement = null;
+Core.Agent.DynamicFieldByServiceLastKey = null;
 Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 	/**
@@ -35,18 +30,13 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 		// Trigger service change event in order to auto load form definitions for the given Service ID
 		$('#ServiceID').trigger("change");
 
-		//
 		// Function responsible to monitor Ligero Forms fields 
-		//
 		var checkLigeroForms = function(webAction) {
 			return function() {
-				//
 				// If Service was defined
-				//
 				if ($('#ServiceID').val()) {
-					//
+
 					// Identify interfaceName ( used to detect which fields will be visible per interface )
-					//
 					var formID = "";
 					$("form").each(function () {
 						if ($(this).attr("name") == "compose") {
@@ -55,9 +45,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 					});
 
-					//
 					// Prepare Data to be sent on AJAX requests
-					//
 					var Data = {
 						Action:           'DynamicFieldByService',
 						Subaction:        webAction,
@@ -72,7 +60,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 					}
 					Data.ChallengeToken = Core.Config.Get('ChallengeToken');
 
-					//
 					// If ACL check, use a different POST format
 					if (webAction == 'HideAndShowDynamicFields') {
 						var QueryString = '';
@@ -82,20 +69,15 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						Data = Core.AJAX.SerializeForm($('#' + formID), Data) + QueryString;
 					}
 
-					//
 					// Request form content
-					//
 					Core.AJAX.FunctionCall(
 						Core.Config.Get('CGIHandle'),
 						Data,
 						function (Response) {
-
 							// No data? bye bye
 							if (Response == 0) return;
 
-							//
 							// Get values/attributes for current fields to keep already filled data
-							//
 							try {
 								$(Response).find('.AddDFS').each(function() {
 									var dfsID = $(this).attr('id');
@@ -112,36 +94,27 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								value: $('#RichText').val()
 							};
 
-							//
 							// Keep upload form fields
-							//
 							$('.AddDFS').each(function () {
 								var $that = $(this);
 								if ($that.is(':file'))
 									uploadFields[ $that.attr('id') ] = $that.clone();
 							});
 
-
-							//
 							// Parse ajax response
-							//
 							var res    = Response.split(':$$:Add:$$:');
 							Response   = res[0];
 							arrayJSON  = res[1].split('@%@%@');
 
-							//
 							// Define some local variables in order to insert the form fields inside de DOM
-							//
 							var i;
 							reloadFields              = "";
 							var AgentFieldConfigInsert    = ".SpacingTop:first";
 							var CustomerFieldConfigInsert = "#BottomActionRow";
 
-							//
 							// Set default values for the Service Form fields,
 							// before adding them to the DOM. Also add fields to reloadFields
 							// variable
-							//
 							for (i = 0; i < arrayJSON.length; i++) {
 								objectJSON = $.parseJSON(arrayJSON[i]);
 								$.each(objectJSON, function (key, val) {
@@ -150,11 +123,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 											window.CKEDITOR.instances['RichText'].on('instanceReady', function() { 
 												window.CKEDITOR.instances['RichText'].setData(val);
 											});
-											//
+
 											// The following line is needed because when the service is changed
 											// the code above is not triggered since 'instanceReady' will not be
 											// triggered again.
-											//
 											window.CKEDITOR.instances['RichText'].setData(val);
 											reloadFields += "" + key + ",";
 										} else if (key === "HideArticle" && val === '1'&& Core.Config.Get('Action').search(/^Customer/)>-1 ) {
@@ -171,41 +143,31 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 											CustomerFieldConfigInsert = "" + val + "";
 										}
 									}
-
 								});
 							}
 							reloadFields = reloadFields.substring(0, reloadFields.length - 1);
 
-							//
 							// Takes the placement for the fields
-							//
 							var FieldConfigInsert = "";
-							if (formID === "NewCustomerTicket")
+							if (formID === "NewCustomerTicket"){
 								FieldConfigInsert = CustomerFieldConfigInsert;
-							else
+							}
+							else {
 								FieldConfigInsert = AgentFieldConfigInsert;
-
-							//
+							}
 							// Remove Form fields from last selected service
-							//
 							cleanOldLigeroFormFields();
 
-							//
 							// Insert fields on DOM and restore form fields
-							//
 							var $ElementToUpdate = $(Response).insertBefore(FieldConfigInsert);
 							Object.keys( uploadFields ).forEach( function(i,v) {
 								$("#"+i).replaceWith( uploadFields[i] );
 							});
 
-							//
 							// Refresh DOM
-							//
 							Core.UI.InputFields.Deactivate();
 							Core.UI.InputFields.Activate();
 
-							
-							//
 							// Loop through updated elements to perform the following actions
 							// 
 							// 1) Execute additional JS code ( tag <script> )
@@ -213,14 +175,11 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 							// 3) Display errors ( if special field is available ) 
 							// 4) Bind additional control events
 							// 5) Fill preLoaded values/attributes
-							//
 							var JavaScriptString = '';
 							var ErrorMessage;
 							if ($ElementToUpdate && isJQueryObject($ElementToUpdate) && $ElementToUpdate.length) {
 
-								//
 								// JS Execution
-								//
 								$ElementToUpdate.find('script').each(function () {
 									JavaScriptString += $(this).html();
 									$(this).remove();
@@ -233,9 +192,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									$.noop(Event);
 								}
 
-								//
 								// Handle errors
-								//
 								if ($ElementToUpdate.children().first().hasClass('ServerError')) {
 									ErrorMessage = $ElementToUpdate.children().first().data('message');
 									// Add class ServerError to the process select element
@@ -245,14 +202,10 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								}
 								Core.Form.Validate.Init();
 
-								//
 								// Bind additional control events
-								//
 								Core.UI.TreeSelection.InitTreeSelection();
 
-								//
 								// Move help triggers into field rows for dynamic fields
-								//
 								$('.Row > .FieldHelpContainer').each(function () {
 									if (!$(this).next('label').find('.Marker').length) {
 										$(this).prependTo($(this).next('label'));
@@ -261,9 +214,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									}
 								});
 
-								//
 								// Bind Dynamic Fields control events and trigger responsive events
-								//
 								Core.UI.TreeSelection.InitDynamicFieldTreeViewRestore();
 								if (Core.App.Responsive.IsSmallerOrEqual(Core.App.Responsive.GetScreenSize(), 'ScreenL'))
 									Core.App.Publish('Event.App.Responsive.SmallerOrEqualScreenL');
@@ -272,9 +223,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								$('#AJAXLoader').addClass('Hidden');
 								$('#AJAXDialog').val('1');
 
-								//
 								// Fill preLoaded data
-								//
 								jQuery.each( Core.Agent.DynamicFieldByServicePreLoad, function( oKey, oObj ) {
 									if (oKey == 'Message' && oObj.value.length) {
 										window.CKEDITOR.instances['RichText'].on('instanceReady', function() { 
@@ -287,18 +236,14 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								});
 								Core.Agent.DynamicFieldByServicePreLoad = {};
 
-								//
 								// Bind change events for new fields in order to trigger form update
-								//
 								$(".AddDFS").not('.RemoveDFS').each(function () {
 
 									// Ignore some fields
 									if ($(this).hasClass('DateSelection') || $(this).hasClass('Validate_MaxLength'))
 										return true;
 
-									//
 									// Get formID
-									//
 									var formID = "";
 									$("form").each(function () {
 										if ($(this).attr("name") == "compose") {
@@ -306,9 +251,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 										}
 									});
 
-									//
 									// Get all inputs inside the given form
-									//
 									var $inputs = $('#' + formID + ' :input');
 									var ids = [];
 									$inputs.each(function (index) {
@@ -318,67 +261,52 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 										}
 									});
 
-									//
 									// Prevent fileUpload reset
-									//
 									var index = ids.indexOf('FileUpload');
 									if (index !== -1) ids.splice(index, 1);
 
-									//
 									// Trigger field update event
-									//
 									var id = $(this).attr('id');
 									$("#" + id).bind('change',function(e) {
 										Core.Agent.DynamicFieldByServiceLastChangedElement = id;
 									});
 									if(Core.Agent.DynamicFieldByServiceLastChangedElement == id){
+										// O callback desta função está removendo o div suspenso do campo modernized selecionado
 										Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id, ids);
 									}
 
-									//
 									// Bind event to restore TreeView for Dynamic Fields on FormUpdates
-									// @TODO: not sure if it's really necessary
-									//
 									Core.App.Subscribe('Event.AJAX.FormUpdate.Callback', function (Data) {
 										var FieldName = id;
+										setTimeout(restoreLastFocusFromCallBack(FieldName), 0);
 										if (Data[FieldName] && $('#' + FieldName).hasClass('DynamicFieldWithTreeView')) {
 											Core.UI.TreeSelection.RestoreDynamicFieldTreeView($('#' + FieldName), Data[FieldName], '', 1);
 										}
-										restoreLastFocus();
 									});
 								});
 							} else {
 								$('#AJAXLoader').addClass('Hidden');
 							}
 
-							//
 							// Restore last focused field
-							//
-							restoreLastFocus();
+							setTimeout(restoreLastFocus(), 0);
 
 							// Bind change events on dynamic fields in order to check ACLs
 							// Exclude Modernized fields search from our filter
-							// $("[id^='DynamicField_'][data-ligeroform!='ok']:not(.InputField_Search)").each(function () {
-							$("[id^='DynamicField_'][data-ligeroform!='ok']").each(function () {
+							$("[id^='DynamicField_'][data-ligeroform!='ok']:not(.InputField_Search)").each(function () {
 									$(this)
 									.bind('change', checkLigeroForms('HideAndShowDynamicFields') )
-									.bind('focus.jstree',  storeLigeroFormLastFocus)
-									.attr('data-ligeroform', 'ok');
 							});
-							// $("[id^='DynamicField_']").each(function () {
-							// 	$(this)
-							// 		.bind('focus.jstree',  storeLigeroFormLastFocus)
-							// });
-
-						}, 'html');
+							$("[id^='DynamicField_'][data-ligeroform!='ok']").each(function () {
+								$(this)
+								.bind('focus.jstree',  storeLigeroFormLastFocus)
+								.attr('data-ligeroform', 'ok');
+						});
+					}, 'html');
 				} else {
-
-					//
 					// No service was selected
-					//
 					cleanOldLigeroFormFields();
 
-					// 
 					// Clean ( possible cached ) data for current fields
 					if(reloadFields.length){
 						var arrayFieldsClean = reloadFields.split(',');
@@ -390,24 +318,19 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								$('#' + arrayFieldsClean[i]).val('');
 							}
 						}
-						//
 						// Trigger form update events
-						//
 						Core.AJAX.FormUpdate($('#' + formID), 'AJAXUpdate', 'ServiceID', [reloadFields]);
 						$('#Subject').parent().show();
 						$('.RichTextHolder').show();
 						$('.DnDUploadBox').parent().parent().show();
 						$('#AJAXLoaderSubject\\,Message').hide();
-						}
+					}
 				}
-
 				return false;
 			};
 		};
 
-		//
 		// Clean old Ligero Form fields to prevent duplicated fields
-		//
 		var cleanOldLigeroFormFields = function() {
 			$('.AddDFS').each(function () {
 				var $that = $(this);
@@ -415,9 +338,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 			}).addClass('RemoveDFS');
 		};
 
-		//
 		// Store last focused field
-		//
 		var storeLigeroFormLastFocus = function(e) {
 			if(typeof e !== 'undefined' && typeof e.target.id !== 'undefined'){
 				var ModernizeSubelement = /_anchor$/;
@@ -428,38 +349,50 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 				} else {
 					NewFocus = e.target.id
 				}
-				console.log('FOCO ATUAL: '+NewFocus)
 				Core.Agent.DynamicFieldByServiceLastFocus = NewFocus;
 			}
 		};
 
 		var restoreLastFocus = function(e) {
-			if (Core.Agent.DynamicFieldByServiceLastFocus) {
-							// var prevEl = $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','_Select'));
-							// if (prevEl.hasClass('jstree')) {
-							// 	prevEl.parent().parent().remove();
-							// }
-				// @TODO: fix focus continue on TAB key mainly in Dropdown fields
-				// The best way to not trigger modernize focus, making a weird
-				// options dialog reshow
-				// Core.UI.InputFields.Deactivate();
-				// $('#' + Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','')).focus();
-				$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus();
-				// Core.UI.InputFields.Activate();
-			};
+			// @TODO: tratar a tecla TAB para casos onde há carregamento de novos campos a partir de ACLs
+			//			do hide and show, para que o foco não pule o próximo campo
+			// if (Core.Agent.DynamicFieldByServiceLastKey !== null
+			// 	&& Core.Agent.DynamicFieldByServiceLastKey == 'TAB'){
+			// 		console.log('TAB Key')
+			// 	} else {
+					// RR: Coloquei com o setTimeout para deixar essa função assincrona. O resultado foi melhor
+					// pois chamando direto fazia com que o campo modernized ocultasse a caixa de seleção
+					if(Core.Agent.DynamicFieldByServiceLastFocus !== null){
+						$('.jstree').parent().parent().remove();
+						setTimeout(function(){$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus()}, 400);
+					}
+				// }
+		}
+
+		var restoreLastFocusFromCallBack = function(id){
+			if(Core.Agent.DynamicFieldByServiceLastFocus !== null
+				&& Core.Agent.DynamicFieldByServiceLastFocus.replace('_Search','').replace('_Select','') == id){
+				// Restore last focused field
+				setTimeout(restoreLastFocus(), 0);
+			}
 		}
 
 		// Sotre the last elements
 		var FormsKey = function(Event){
+			if(
+			typeof Event !== 'undefined'
+			&& Event.which === $.ui.keyCode.TAB) {
+				Core.Agent.DynamicFieldByServiceLastKey = 'TAB';
+			} else {
+				Core.Agent.DynamicFieldByServiceLastKey = '';
+			}
 			storeLigeroFormLastFocus(Event);
 		};
 		document.addEventListener('keyup', FormsKey, true);
 		document.addEventListener('keydown', FormsKey, true);
 		document.addEventListener('keydpress', FormsKey, true);
 
-		//
 		// Bind event for Service fields
-		//
 		$("#ServiceID[data-ligeroform!='ok']").each(function () {
 			$(this)
 				.bind('change', checkLigeroForms('DisplayActivityDialogAJAX'))
