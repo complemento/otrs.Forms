@@ -188,7 +188,7 @@ sub Run {
         my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
         # get params
         my %GetParam;
-        for my $Key (qw(
+        for my $Key (qw( OriginalAction
             NewStateID NewPriorityID TimeUnits IsVisibleForCustomer Title Body Subject NewQueueID
             Year Month Day Hour Minute NewOwnerID NewResponsibleID TypeID ServiceID SLAID
             Expand ReplyToArticle StandardTemplateID CreateArticle FormDraftID Title
@@ -199,6 +199,7 @@ sub Run {
             delete $GetParam{$Key} if !$GetParam{$Key};
         }
 
+        $GetParam{Action} = $GetParam{OriginalAction};
         # ACL compatibility translation
         my %ACLCompatGetParam = (
             StateID       => $GetParam{NewStateID},
@@ -290,7 +291,7 @@ sub Run {
                 'DescriptionLong' => '',
                 # @TODO = Get Default Value from dynamic field config
                 'DefaultValue' => ''
-            }
+            }    
         }
 
 		$ActivityDialogHTML = $Self->_OutputShowHideDynamicFields(
@@ -1399,10 +1400,6 @@ sub _Overview {
         for my $ID ( sort { $List{$a} cmp $List{$b} } keys %List ) {
 
             my %Data = $Kernel::OM->Get('Kernel::System::DynamicFieldByService')->DynamicFieldByServiceGet( ID => $ID, );
-            #$LogObject->Log(
-            #    Priority => 'error',
-            #    Message  => Dumper(\%List)
-            #);
 
             $LayoutObject->Block(
                 Name => 'OverviewResultRow',
@@ -2093,9 +2090,13 @@ sub _RenderDynamicField {
 
         # All Ticket DynamicFields
         # used for ACL checking
-        my %DynamicFieldCheckParam = map { $_ => $Param{GetParam}{$_} }
-            grep {m{^DynamicField_}xms} ( keys %{ $Param{GetParam} } );
+        my %DynamicFieldCheckParam = map { $_ => $Param{GetParam}->{DynamicField}{$_} }
+            grep {m{^DynamicField_}xms} ( keys %{ $Param{GetParam}->{DynamicField} } );
 
+$Kernel::OM->Get('Kernel::System::Log')->Log(
+    Priority => 'error',
+    Message  => "------------------ XXXXXXXXXXXXXXX--  ".$Self->{Action} . "-----".Dumper(%Param),
+);
         # check if field has PossibleValues property in its configuration
         if ( IsHashRefWithData($PossibleValues) ) {
 
@@ -4503,9 +4504,7 @@ sub _OutputShowHideDynamicFields {
 	my %Ticket;
 
 	my $Output='';
-    # my %RenderedFields = ();
 
-    # my @FieldsOrder;
     # ################################### MONTAR ORDEM DOS CAMPOS AQUI
     my $DynamicFieldOrder = $Kernel::OM->Get('Kernel::System::DynamicField')->DynamicFieldList(
         Valid       => 1,

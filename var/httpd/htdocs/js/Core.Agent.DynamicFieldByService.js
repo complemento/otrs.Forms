@@ -35,7 +35,8 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 			return function() {
 				// If Service was defined
 				if ($('#ServiceID').val()) {
-
+					$('.InputField_Search').attr("aria-expanded","true");
+					// Core.UI.InputFields.Deactivate();
 					// Identify interfaceName ( used to detect which fields will be visible per interface )
 					var formID = "";
 					$("form").each(function () {
@@ -48,6 +49,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 					// Prepare Data to be sent on AJAX requests
 					var Data = {
 						Action:           'DynamicFieldByService',
+						OriginalAction:   Core.Config.Get('Action'),
 						Subaction:        webAction,
 						ServiceDynamicID: $('#ServiceID').val(),
 						InterfaceName:    formID,
@@ -219,10 +221,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 								if (Core.App.Responsive.IsSmallerOrEqual(Core.App.Responsive.GetScreenSize(), 'ScreenL'))
 									Core.App.Publish('Event.App.Responsive.SmallerOrEqualScreenL');
 
-								// Visual fix @TODO: not sure if it's really necessary
-								$('#AJAXLoader').addClass('Hidden');
-								$('#AJAXDialog').val('1');
-
 								// Fill preLoaded data
 								jQuery.each( Core.Agent.DynamicFieldByServicePreLoad, function( oKey, oObj ) {
 									if (oKey == 'Message' && oObj.value.length) {
@@ -270,26 +268,13 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 									$("#" + id).bind('change',function(e) {
 										Core.Agent.DynamicFieldByServiceLastChangedElement = id;
 									});
-									if(Core.Agent.DynamicFieldByServiceLastChangedElement == id){
-										// O callback desta função está removendo o div suspenso do campo modernized selecionado
-										Core.AJAX.FormUpdate($(this).parents('form'), 'AJAXUpdate', id, ids);
-									}
-
-									// Bind event to restore TreeView for Dynamic Fields on FormUpdates
-									Core.App.Subscribe('Event.AJAX.FormUpdate.Callback', function (Data) {
-										var FieldName = id;
-										setTimeout(restoreLastFocusFromCallBack(FieldName), 0);
-										if (Data[FieldName] && $('#' + FieldName).hasClass('DynamicFieldWithTreeView')) {
-											Core.UI.TreeSelection.RestoreDynamicFieldTreeView($('#' + FieldName), Data[FieldName], '', 1);
-										}
-									});
 								});
 							} else {
 								$('#AJAXLoader').addClass('Hidden');
 							}
 
 							// Restore last focused field
-							setTimeout(restoreLastFocus(), 0);
+							setTimeout(restoreLastFocus(), 100);
 
 							// Bind change events on dynamic fields in order to check ACLs
 							// Exclude Modernized fields search from our filter
@@ -364,7 +349,12 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 					// pois chamando direto fazia com que o campo modernized ocultasse a caixa de seleção
 					if(Core.Agent.DynamicFieldByServiceLastFocus !== null){
 						$('.jstree').parent().parent().remove();
-						setTimeout(function(){$('#' + Core.Agent.DynamicFieldByServiceLastFocus).focus()}, 400);
+						console.log('olha ai '+Core.Agent.DynamicFieldByServiceLastFocus);
+
+						var setFocus = function(element){
+							$('#'+element).focus();
+						}
+						setTimeout(setFocus(Core.Agent.DynamicFieldByServiceLastFocus), 400);
 					}
 				// }
 		}
