@@ -96,12 +96,6 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                         var res = Response.split(':$$:Add:$$:');
                         //LOOP QUE PEGA OS VALORES E OS NOMES 
                         var IsUpload = Core.Config.Get('LigeroFormsIsUpload');
-
-                        //Verifica se tem erro na pagina
-                        if($('.ServerError').length > 0){
-                            IsUpload = 1;
-                        }
-
                         Core.Config.Set('LigeroFormsIsUpload');
                         Response = res[0];
                         var i;
@@ -148,44 +142,36 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
                              FieldConfigInsert =  AgentFieldConfigInsert;
                         } 	
                         
-                        // var PreviousValues = {};
-                        // var Errors = {};
-                        // var Checkeds = {};
-                        var Elements = '';
+                        var PreviousValues = {};
+                        var Checkeds = {};
                         
                         if(IsUpload){
                             // Get form values previously filled and remove default fields
                             $('.AddDFS',$(Response)).each(function(){
-                                var $that = $('#'+$(this).attr('id'));
-                                // PreviousValues[$(this).attr('id')] = $('#'+$(this).attr('id')).val();
-                                // Errors[$(this).attr('id')] = $('#'+$(this).attr('id')+'ServerError').length>0? $('#'+$(this).attr('id')+'ServerError').get(0).outerHTML:'';
-                                Elements += $($that).parent().parent().get(0).outerHTML;
+                                PreviousValues[$(this).attr('id')] = $('#'+$(this).attr('id')).val();
                                 // Remove default fields
+                                var $that = $('#'+$(this).attr('id'));
                                 $($that).parent().parent().fadeOut(400, function() {
                                         $($that).parent().parent().empty();
                                 });
                             });
                             // Get form values previously checked checkbox
-                            // $('input:checkbox',$(Response)).each(function(){
-                            //     Checkeds[$(this).attr('id')] = $("#"+$(this).attr('id')).attr('checked');
-                            // });
-                            // Se for upload ou erro de servidor, o Response será a própria sequência de elementos do servidor
-                            // @TODO: testar com ACL
-                            Response = Elements;
+                            $('input:checkbox',$(Response)).each(function(){
+                                Checkeds[$(this).attr('id')] = $("#"+$(this).attr('id')).attr('checked');
+                            });
+                            
                         }
                         var $ElementToUpdate = $(Response).insertBefore(FieldConfigInsert),
-                        // var $ElementToUpdate = $(Elements).insertBefore(FieldConfigInsert),
                         JavaScriptString = '',
                         ErrorMessage;
 
                         // Set Previous values if any
-                        // $.each(PreviousValues, function(index, value) {
-                        //     $('#'+index).val(value);
-                        // }); 
-                        // $.each(Checkeds, function(index, value) {
-                        //     $('#'+index).attr('checked',value);
-                        // }); 
-
+                        $.each(PreviousValues, function(index, value) {
+                            $('#'+index).val(value);
+                        }); 
+                        $.each(Checkeds, function(index, value) {
+                            $('#'+index).attr('checked',value);
+                        }); 
 
 ////////////////////////////////////////////////////////
                         Core.UI.InputFields.Deactivate();
