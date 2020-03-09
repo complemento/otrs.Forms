@@ -4521,7 +4521,7 @@ sub _OutputShowHideDynamicFields {
     my %FieldsOrder;
     if(ref($DynamicFieldOrder) eq 'ARRAY'){
         my $LastFieldOrder=0;
-        my $LocalOrder=0;
+        my $LocalOrder=1;
 
         for my $Field (@{$DynamicFieldOrder}){
             # Pega o campo
@@ -4535,11 +4535,15 @@ sub _OutputShowHideDynamicFields {
             if (defined($index)){
                 # se tem ordem definida no form, sua ordem é esta então
                 # e definimos ela na chave do FieldsOrder
+                if($LastFieldOrder != $index){
+                    $LocalOrder = 1;
+                }
                 $LastFieldOrder = $index;
             } else {
                 # Se não tem ordem definida no form, sua ordem é a ordem do último
                 # campo ordenado do formulário + sua ordem no FieldsOrder geral
-                $index = $LastFieldOrder+"0.$DynamicField->{FieldOrder}";
+                $index = $LastFieldOrder+"0.$LocalOrder";
+                $LocalOrder = $LocalOrder+ 1;
             }
             $FieldsOrder{"$index"} = $DynamicField;
         }
