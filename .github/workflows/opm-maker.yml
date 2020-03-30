@@ -3,11 +3,7 @@ name: OPM Maker
 on: 
   push:
     paths:
-      - "Custom/*.sopm"
-    branches:
-      - rel-5_0
-      - rel-6_0
-
+    - "Custom/*.sopm"
 
 jobs:
 
@@ -30,7 +26,7 @@ jobs:
       id: get_version
       run: echo ::set-output name=VERSION::$(grep '<Version>' Custom/*.sopm | sed -r 's/.+>(.+)<.+/\1/')
       
-    - name: Release OPM
+    - name: Upload OPM
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -39,4 +35,3 @@ jobs:
         title: ${{ steps.get_version.outputs.VERSION }}
         files: |
           *.opm
-
