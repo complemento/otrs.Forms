@@ -2093,10 +2093,6 @@ sub _RenderDynamicField {
         my %DynamicFieldCheckParam = map { $_ => $Param{GetParam}->{DynamicField}{$_} }
             grep {m{^DynamicField_}xms} ( keys %{ $Param{GetParam}->{DynamicField} } );
 
-$Kernel::OM->Get('Kernel::System::Log')->Log(
-    Priority => 'error',
-    Message  => "------------------ XXXXXXXXXXXXXXX--  ".$Self->{Action} . "-----".Dumper(%Param),
-);
         # check if field has PossibleValues property in its configuration
         if ( IsHashRefWithData($PossibleValues) ) {
 
@@ -4530,21 +4526,19 @@ sub _OutputShowHideDynamicFields {
 
             my ($index) = grep { $ActivityDialog->{Config}{FieldOrder}[$_] eq "DynamicField_".$DynamicField->{Name} } (0 .. @{ $ActivityDialog->{Config}{FieldOrder} }-1);
 
+
             # Verificar se o campo possui ordem definida no Formulário
             if (defined($index)){
                 # se tem ordem definida no form, sua ordem é esta então
                 # e definimos ela na chave do FieldsOrder
-                if($LastFieldOrder != $index){
-                    $LocalOrder = 1;
-                }
                 $LastFieldOrder = $index;
             } else {
                 # Se não tem ordem definida no form, sua ordem é a ordem do último
                 # campo ordenado do formulário + sua ordem no FieldsOrder geral
-                $index = $LastFieldOrder+"0.$LocalOrder";
-                $LocalOrder = $LocalOrder+ 1;
+                $index = $LastFieldOrder+1;
+                $LastFieldOrder = $index;
             }
-            $FieldsOrder{"$index"} = $DynamicField;
+            $FieldsOrder{$index} = $DynamicField;
         }
     }
 
