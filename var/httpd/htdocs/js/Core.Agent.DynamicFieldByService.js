@@ -77,7 +77,11 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						Data,
 						function (Response) {
 							// No data? bye bye
-							if (Response == 0) return;
+							if (Response == 0) {
+								Core.UI.InputFields.Deactivate();
+								Core.UI.InputFields.Activate();
+								return;
+							}
 
 							// Get values/attributes for current fields to keep already filled data
 							try {
