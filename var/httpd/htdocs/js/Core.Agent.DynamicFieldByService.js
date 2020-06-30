@@ -11,6 +11,7 @@ Core.Agent.DynamicFieldByServicePreLoad = {};
 Core.Agent.DynamicFieldByServiceLastFocus = null;
 Core.Agent.DynamicFieldByServiceLastChangedElement = null;
 Core.Agent.DynamicFieldByServiceLastKey = null;
+Core.Agent.checkLigeroForms;
 Core.Agent.DynamicFieldByService = (function (TargetNS) {
 
 	/**
@@ -393,6 +394,9 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 				.bind('focus',  storeLigeroFormLastFocus)
 				.attr('data-ligeroform', 'ok');
 		});
+
+		//console.log("CHEGUEI AQUI");
+		//checkLigeroForms('HideAndShowDynamicFields');
 	};
 
 	// Register Ligero Forms in the initialization of the Action

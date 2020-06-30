@@ -159,7 +159,7 @@ sub Run {
                 for my $CurrentField ( @{ $DynamicFieldsByService->{Config}{FieldOrder} } ) {
                     my %FieldData = %{ $DynamicFieldsByService->{Config}{Fields}{$CurrentField} };
 
-                    next DIALOGFIELD if !$FieldData{Display};
+                    next DIALOGFIELD if !$FieldData{Display} || $FieldData{Display} == 3;
         
                     # render DynamicFields
                     if ( $CurrentField =~ m{^DynamicField_(.*)}xms ) {
@@ -1282,9 +1282,10 @@ sub _Edit {
 #    # create Display selection
     $Param{DisplaySelection} = $LayoutObject->BuildSelection(
         Data => {
-            0 => 'Do not show Field',
+            #0 => 'Do not show Field',
             1 => 'Show Field',
             2 => 'Show Field As Mandatory',
+            3 => 'Do not show Field',
         },
         Name        => 'Display',
         ID          => 'Display',
@@ -1463,7 +1464,7 @@ sub _OutputActivityDialog {
 	    for my $CurrentField ( @{ $ActivityDialog->{Config}{FieldOrder} } ) {
             my %FieldData = %{ $ActivityDialog->{Config}{Fields}{$CurrentField} };
 		    # We render just visible ActivityDialogFields
-            next DIALOGFIELD if !$FieldData{Display};
+            next DIALOGFIELD if !$FieldData{Display} || $FieldData{Display} == 3;
 		    $Self->{FormID} = "NewPhoneTicket";
             # render DynamicFields
             if ( $CurrentField =~ m{^DynamicField_(.*)}xms ) {
