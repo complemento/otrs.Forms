@@ -79,6 +79,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 						function (Response) {
 							// No data? bye bye
 							if (Response == 0) {
+								cleanOldLigeroFormFields();
 								Core.UI.InputFields.Deactivate();
 								Core.UI.InputFields.Activate();
 								return;
@@ -326,6 +327,7 @@ Core.Agent.DynamicFieldByService = (function (TargetNS) {
 				var $that = $(this);
 				$that.parents('.Row').remove();
 			}).addClass('RemoveDFS');
+			window.CKEDITOR.instances['RichText'].setData('');
 		};
 
 		// Store last focused field
