@@ -5,7 +5,13 @@ on:
     paths:
     - "Custom/*.sopm"
     - ".github/workflows/*.yml"
-
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+        
 jobs:
 
   build:
