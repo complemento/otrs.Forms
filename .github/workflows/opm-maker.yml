@@ -4,11 +4,14 @@ on:
   push:
     paths:
       - "Custom/*.sopm"
-    branches:
-      - rel-5_0
-      - rel-6_0
-
-
+      - ".github/workflows/*.yml"
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+        
 jobs:
 
   build:
