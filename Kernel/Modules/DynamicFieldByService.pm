@@ -147,13 +147,14 @@ sub Run {
         my $ActivityDialogHTML;
         my $Action = $Self->{Action}||'';
         my $DfByServiceObject = $Kernel::OM->Get('Kernel::System::DynamicFieldByService');
+        my $ACLObject = $Kernel::OM->Get('Kernel::System::ACL::DB::ACL');
+
         # # Verifica se há o parametro ServiceID
         my $ServiceID  = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam( Param => 'ServiceID' ) || '';
         my $Subaction = $Self->{Subaction} || '';	    
         
         my $DynamicFieldsByService = $DfByServiceObject->GetDynamicFieldByService(ServiceID => $ServiceID);
         my %DynamicFieldsHash;
-
         if ($DynamicFieldsByService->{Config}){
             DIALOGFIELD:
                 for my $CurrentField ( @{ $DynamicFieldsByService->{Config}{FieldOrder} } ) {
@@ -245,7 +246,24 @@ sub Run {
         my %PossibleActions;
 
         my $Counter=0;
+        my $AclList = $ACLObject->ACLListGet( UserID => 1, ValidIDs => ['1'] );
         for my $DF (keys %$DynamicFields){
+
+            # Detect DF on ACLs
+            my $foundDF = 0;
+            foreach my $aclObj ( @{$AclList} ) {
+                if (defined($aclObj->{ConfigChange})) {
+                    foreach my $PossibleKeys ( keys %{$aclObj->{ConfigChange}} ) {
+                        foreach my $PossibleActions ( keys %{$aclObj->{ConfigChange}->{$PossibleKeys}} ) {
+                            foreach my $PossibleDF ( @{$aclObj->{ConfigChange}->{$PossibleKeys}->{$PossibleActions}} ) {
+                                $foundDF = 1 if ($PossibleDF =~ m/$DynamicFields->{$DF}/ig);
+                            }
+                        }
+                    }
+                }
+            }
+            next if (!$foundDF);
+
             $Counter++;
             $PossibleActions{$Counter} = "DF_".$DynamicFields->{$DF};
             $Counter++;
