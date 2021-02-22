@@ -1,0 +1,5 @@
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    Ligero.Forms.Init();
+//]]></script>
+[% END %]

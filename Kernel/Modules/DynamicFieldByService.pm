@@ -25,41 +25,6 @@ sub new {
     my $Self = {%Param};
     bless( $Self, $Type );
 
-    # global config hash for id dissolution
-    $Self->{NameToID} = {
-        Title          => 'Title',
-        State          => 'StateID',
-        StateID        => 'StateID',
-        Priority       => 'PriorityID',
-        PriorityID     => 'PriorityID',
-        Lock           => 'LockID',
-        LockID         => 'LockID',
-        Queue          => 'QueueID',
-        QueueID        => 'QueueID',
-        Customer       => 'CustomerID',
-        CustomerID     => 'CustomerID',
-        CustomerNo     => 'CustomerID',
-        CustomerUserID => 'CustomerUserID',
-        Owner          => 'OwnerID',
-        OwnerID        => 'OwnerID',
-        Type           => 'TypeID',
-        TypeID         => 'TypeID',
-        SLA            => 'SLAID',
-        SLAID          => 'SLAID',
-        Service        => 'ServiceID',
-        ServiceID      => 'ServiceID',
-        Responsible    => 'ResponsibleID',
-        ResponsibleID  => 'ResponsibleID',
-        PendingTime    => 'PendingTime',
-        Article        => 'Article',
-    };
-
-    # get the dynamic fields for ticket object
-    $Self->{DynamicField} = $Kernel::OM->Get('Kernel::System::DynamicField')->DynamicFieldListGet(
-        Valid      => 1,
-        ObjectType => ['Ticket','Article'],
-    );
-
     return $Self;
 }
 
